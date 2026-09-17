@@ -1,0 +1,1208 @@
+conflict_resolution: S21 > S15-C > A2C
+criteria:
+- decidable: auto
+  id: T01
+  inputs:
+  - data_matrix
+  - scale_declaration
+  - test_family
+  name: 尺度声明与检验家族
+  note: 家族须含终点数/亚组数/模型数/分子数四类(S21-A §4)
+  on_fail:
+    action: V3否决
+    blocking: true
+  pass_when: true
+  predicate: scale_declared(data_matrix) and family_declared(test_family)
+  requires_tools:
+  - scale_check
+  stage_tag: deg
+  version: 1.8+
+- decidable: auto
+  id: T03
+  inputs:
+  - pvalues
+  - declared_family
+  - correction_method
+  name: 多重检验校正范围
+  on_fail:
+    action: V3否决
+    blocking: true
+  pass_when: true
+  predicate: correction_matches(pvalues, declared_family, correction_method)
+  requires_tools:
+  - bh_correct
+  - bonferroni
+  stage_tag: enrichment
+  version: 1.8+
+- decidable: hybrid
+  id: T06
+  inputs:
+  - time
+  - event
+  - competing_events
+  - exposure_def
+  - method_choice
+  judge_rubric: 人工判定:①是否声明竞争风险处理方式(Cause-specific vs Fine-Gray 二选一并预注册)?②是否评估 immortal time bias(landmark
+    或时间依赖协变量)?③cox.zph 不满足时是否改用 RMST?④中位随访与 at-risk 表是否报告?缺①在老年/肿瘤/心血管队列中直接不通过。
+  name: 时间-事件分析(含竞争风险与时间偏倚)
+  note: S21-A §1/§2。竞争事件>10% 强制处理;CSH/Fine-Gray 须二选一预注册
+  on_fail:
+    action: T06不通过
+    blocking: true
+  pass_when: true
+  predicate: 'competing_declared(competing_events)
+
+    and (prop_competing <= 0.10 or competing_handled(method_choice))
+
+    and (not exposure_requires_survival(exposure_def) or landmark_or_tdcov_used())
+
+    '
+  requires_tools:
+  - cif_estimator
+  - km_estimator
+  - cox_ph_test
+  stage_tag: survival
+  version: 1.8+
+- decidable: hybrid
+  id: T08
+  inputs:
+  - missing_prop
+  - mechanism
+  - sensitivity_done
+  judge_rubric: 人工判定:①缺失机制判断(MCAR/MAR/MNAR)是否有依据?②插补模型是否含结局变量?③是否报告了缺失比例与模式?④MNAR 是否做了 tipping point /
+    delta 调整?缺②直接不通过。
+  name: 缺失数据处理(含 MNAR)
+  note: S21-A §5。MNAR 为默认情形,须 tipping point / pattern-mixture / reference-based
+  on_fail:
+    action: T08不通过
+    blocking: true
+  pass_when: true
+  predicate: '(missing_prop <= 0.05) or sensitivity_done
+
+    and (missing_prop <= 0.20 or tipping_point_reported)
+
+    '
+  requires_tools:
+  - missingness_report
+  stage_tag: imputation
+  version: 1.8+
+- decidable: auto
+  id: T09
+  inputs:
+  - p_pred
+  - source
+  name: 预测概率来源声明
+  note: S21-C §4。禁止用样本内概率做性能评估
+  on_fail:
+    action: T09不通过
+    blocking: true
+  pass_when: true
+  predicate: source_declared(p_pred) and source != 'insample'
+  requires_tools: []
+  stage_tag: prediction
+  version: 1.8+
+- decidable: auto
+  id: T12
+  inputs:
+  - acc_insample
+  - auc_outsample
+  name: 过拟合警示
+  on_fail:
+    action: 强制标注过拟合警示
+    blocking: false
+  pass_when: true
+  predicate: not (acc_insample > 0.95 and (acc_insample - auc_outsample) > 0.05)
+  requires_tools: []
+  stage_tag: performance
+  version: 1.8+
+- aliases:
+  - T13(a)
+  - T13a
+  decidable: auto
+  id: T13a
+  inputs:
+  - auc_base_ci
+  - auc_full_ci
+  - dAUC_ci
+  name: 临床增量
+  on_fail:
+    action: F3
+    blocking: true
+  pass_when: true
+  predicate: dAUC >= 0.05 and ci_lower(dAUC) > 0
+  requires_tools:
+  - bootstrap
+  - roc_auc
+  version: 1.8+
+- decidable: auto
+  id: T13b
+  inputs:
+  - y_true
+  - p_pred_cv
+  - n_boot
+  invariants:
+  - 必须使用 CV 预测概率;训练内拟合斜率恒等于 1(数学必然)
+  model_family_caveat: '"恒等于 1" 仅对**未正则化 logistic** 成立(MLE 一阶条件); ridge / lasso / EN 与 RF / GBM / SVM
+    不恒成立,但同样系统性乐观。 故**所有模型族**均须用 CV 预测概率。脚本分支 3 用未正则化 logistic, 验证的是"恒等于 1"的下界 —— 可接受,条文须写明此限定。'
+  name: 校准判据
+  on_fail:
+    action: F3 + 不得用于个体风险预测
+    blocking: true
+  pass_when: true
+  predicate: ci_covers(calibration_slope_bootstrap(y_true, p_pred_cv, n_boot), 1.0)
+  requires_tools:
+  - bootstrap
+  - logistic_fit
+  small_sample_extension:
+    rationale: 'TL-BEE 实测:n=5~50 时,用 importance sampling + control variates 借源域
+
+      信息后,误差估计的 MSE 显著低于传统估计器。但相关度若事后调参,
+
+      等于把结论塞进先验 —— 故必须预注册。
+
+      '
+    required:
+    - 必须声明是否使用源域信息(迁移学习 / 先验 / 数据增强)
+    - 若使用,必须报告源域-目标域**相关度系数** |alpha| 及其确定方法
+    - 若 |alpha| 系"看着结果调出来的" → R3 回退
+    trigger: 目标域 n < 50
+  version: 1.8+
+- aliases:
+  - T13(c)
+  - T13c
+  blocking_threshold: 12
+  clinical_magnitude: 胜出率高≠临床有意义;中位|ΔNB|<0.01 视为无临床意义
+  decidable: auto
+  deprecated_indicators:
+  - 最优子区间胜出率与落差 —— O(n^2) 候选下几乎必然≈1.0,等价于 1-win_rate_full,无独立判别力
+  grey_zone: 8 < neg_run < 12 → 判'不确定',不得判通过
+  id: T13c
+  inputs:
+  - y_true
+  - p_candidate
+  - p_baseline
+  - preregistered_range
+  must_report:
+  - 'net_benefit_diff_median_abs: 预注册区间内 |NB差| 中位数(强制)'
+  - 'net_benefit_diff_min: 预注册区间内 NB 差最小值(强制)'
+  name: 决策意义(DCA)
+  on_fail:
+    action: F3
+    blocking: true
+  pass_when: verdict == True
+  predicate: '# v1.6:判定式必须引用 warning/blocking 阈值,禁止硬编码 10 点单阈值。
+
+    # v1.6 前为硬编码单阈值(neg_run 对 10 取小于),与 warning=8/blocking=12 矛盾,已废。
+
+    win_rate_full <- mean(nb_diff(y_true, p_candidate, p_baseline, grid) > 0)
+
+    neg_run <- max_consecutive_negative(nb_diff, preregistered_range)
+
+    if neg_run >= blocking_threshold:   verdict <- F3
+
+    elif neg_run >= warning_threshold:  verdict <- ''不确定''   # 灰区,不得判通过
+
+    else: verdict <- (win_rate_full >= 0.5)
+
+    verdict
+
+    '
+  requires_tools:
+  - net_benefit
+  - curve_shape
+  stage_tag: dca
+  threshold_note: 连续负 ≥10 点为默认,无临床推导依据;填槽阶段按场景定死 (卒中 0.15-0.35 / 筛查 0.05-0.20)。建议双阈值 8 点警告 / 12 点阻断, 中间判不确定
+    —— 已校准模型实测 8 点,单阈值余量仅 2。
+  threshold_note_struct: 10 点为默认单阈值,无临床推导依据;上列双阈值自 v1.6 起生效。 已校准模型实测 8 点,单阈值余量仅 2 —— 边界情形(9-11 点)既漏检又误伤。
+  version: 1.8+
+  warning_threshold: 8
+- decidable: auto
+  id: T14
+  inputs:
+  - est_discovery_ci
+  - est_replication_ci
+  - I2
+  - power_replication
+  k2_caveat: k=2 时 I2 的 df=1、Q 期望=1,随机波动即可接近 50% —— 不得作唯一判据
+  merge_aux_criteria:
+  - A 事件率差异 < 15%(独立判据)
+  - B 方向一致(效应同号)
+  - C 终点定义等价性 —— 一票否决
+  - I2 > 50% 强制报告异质性来源;> 75% 禁合并主分析
+  method_layer:
+    claim_ceiling:
+      从头训练: 不得声称"跨数据集复现"(那只是独立建模)
+      微调(n_calib>=20): 在该 SOP 下可复用
+      零样本迁移: 在目标数据上方向一致
+    enforcement: T14 与 T27 是**同一次复现判定的两面**,缺 T27 则 T14 无效
+    predicate: T27 的迁移策略声明必须同时满足(T14 结果层 AND T27 方法层)
+    rationale: '一个在目标数据上调过参的模型,两个 CI 当然会重叠 —— 那不是泛化,是泄漏。
+
+      故 T14 不得单独通过:必须与 T27 配对判定。
+
+      '
+    required: true
+  name: 复现判定
+  on_fail:
+    action: R5
+    blocking: false
+  pass_when: verdict == True
+  predicate: "if power_replication < 0.8:\n    verdict <- \"不确定(复现集功效不足)\"     # S21-A §3.6:区分\"没复现\"\
+    与\"没能力复现\"\nelse:\n    verdict <- same_direction and ci_overlap and (I2 <= 50)\n"
+  requires_tools:
+  - heterogeneity
+  - power_calc
+  stage_tag: replication
+  version: 1.8+
+- decidable: auto
+  id: T15
+  inputs:
+  - assay_type
+  - mito_pct
+  - thresholds
+  name: 单细胞 QC 阈值
+  note: 核/单核 mito% 分布不同,单阈值跨类型套用双向失效
+  on_fail:
+    action: T15不通过
+    blocking: false
+  pass_when: true
+  predicate: thresholds_stratified_by_assay_type(assay_type, thresholds)
+  requires_tools:
+  - qc_summary
+  stage_tag: qc
+  version: 1.8+
+  wording_fix: 单核 RNA 为**另行设定更严阈值 <5%**,非放宽(旧文写放宽至 <5%,措辞误导)
+  wording_rationale: 核 RNA 线粒体含量本就低,照抄胞质 RNA 的 <15% 会把目标细胞滤光
+- decidable: hybrid
+  id: T16
+  inputs:
+  - counts
+  - donor_id
+  - celltype
+  - n_cells_per_unit
+  - annotation_method
+  - composition_method
+  judge_rubric: 人工判定:①推断单位是否为 donor/患者(非细胞)?②每 (donor,celltype) 细胞数是否达标?③稀有类型是否走了'合并相近类型'路径?④是否用 pseudobulk?
+  name: 单细胞推断单位与组成
+  on_fail:
+    action: 硬阻断(伪重复)
+    blocking: true
+  pass_when: true
+  predicate: 'inference_unit == "donor"
+
+    and all(n_cells_per_unit >= 10 or excluded)
+
+    and annotation_method_preregistered
+
+    and (composition_question == False or composition_method_preregistered)
+
+    '
+  rare_celltype_path: 第三条路径:稀有类型在多 donor 上均不足 10 细胞时,允许合并相近细胞类型后做 pseudobulk(须预注册合并方案并声明)
+  rare_celltype_rationale: 仅有排除一条路径会系统性滤掉 Treg、浆细胞等稀有类型,反而掩盖真实信号
+  requires_tools:
+  - pseudobulk
+  - rank_test
+  stage_tag: deg
+  version: 1.8+
+- decidable: auto
+  id: T17
+  inputs:
+  - perturbation_method
+  - edge_distribution_preserved
+  invariants:
+  - 倍数扰动不改变与结局的关联,无对照价值,且改变尺度引入混淆
+  - 计算扰动不构成功能验证
+  name: 计算扰动
+  on_fail:
+    action: T17不通过
+    blocking: false
+  pass_when: true
+  predicate: perturbation_method in ['quantile','permutation']
+  requires_tools: []
+  stage_tag: perturbation
+  version: 1.8+
+- decidable: auto
+  id: T18
+  inputs:
+  - results_all_variants
+  - preregistered_variants
+  name: 敏感性分析
+  note: 程序定义已移出必做项,改立 B03-A(S15-C §4)
+  on_fail:
+    action: 硬阻断(选择性报告)
+    blocking: true
+  pass_when: true
+  predicate: reported_all(results_all_variants, preregistered_variants)
+  requires_tools: []
+  stage_tag: sensitivity
+  version: 1.8+
+- decidable: hybrid
+  id: Y6
+  inputs:
+  - batch_structure
+  - coupling_diagnosis
+  - method_preregistered
+  judge_rubric: 人工判定:①批次与生物学条件是否耦合?(耦合→禁止当协变量回归、禁止盲用 ComBat)②若未耦合,整合方法(ComBat/Harmony/scVI/rliger)是否预注册?③批次校正后是否仍宣称'独立复现'?④校正前后是否都做了可视化对比?
+  name: 批次整合
+  note: S21-B §1。批次校正后的内部子集不得称'独立验证集'
+  on_fail:
+    action: R3回退 或 硬阻断
+    blocking: true
+  pass_when: true
+  predicate: 'batch_structure_documented
+
+    and (not fully_coupled or no_correction_applied)
+
+    and method_preregistered
+
+    '
+  requires_tools: []
+  stage_tag: batch
+  version: 1.8+
+- aliases:
+  - B01-A
+  - B01A
+  decidable: auto
+  id: B01A
+  inputs:
+  - n_events
+  - n_candidates
+  - alpha
+  - power
+  - MDE
+  name: 功效与样本量论证
+  on_fail:
+    action: B02不得启动
+    blocking: true
+  pass_when: true
+  predicate: 'EPV <- n_events / n_candidates
+
+    (EPV >= 10) or (regularization_applied) or (EPV >= 5 and dimension_reduced)
+
+    '
+  requires_tools:
+  - epv_calc
+  - power_calc
+  version: 1.8+
+- aliases:
+  - B02-S
+  - B02S
+  decidable: auto
+  id: B02S
+  inputs:
+  - independent_ok
+  - outcome_available
+  - epv
+  - missing_key_prop
+  name: 可行性判定(止损出口)
+  note: INFEASIBLE 是合法且受尊重的结论,禁止为规避而硬判
+  on_fail:
+    action: 'INFEASIBLE: 停止并输出限制与补救建议'
+    blocking: true
+  pass_when: state in ['FEASIBLE','FEASIBLE_WITH_DOWNGRADE']
+  predicate: feasibility_gate(...)
+  requires_tools: []
+  version: 1.8+
+- aliases:
+  - B03-A
+  - B03A
+  decidable: hybrid
+  id: B03A
+  inputs:
+  - candidate_definitions
+  - effect_per_definition
+  - selection_rationale
+  judge_rubric: 人工判定:①程序定义变体是否为成员集层面的实质变更(Jaccard ≤ 0.5,排除纯权重缩放与部分归零)?②是否在分析前冻结并留痕?③是否只做了权重缩放(橡皮图章)?④报告的是否为全部变体(含不显著的)?
+  name: 程序/签名定义论证
+  on_fail:
+    action: 不得冻结
+    blocking: true
+  overlap_evidence: 实测 相对重叠 32.5% vs Jaccard 19.4% —— 两口径不等,条文须指定
+  overlap_metric: Jaccard = |A∩B|/|A∪B| —— 非相对重叠 |A∩B|/|A|
+  overlap_threshold: Jaccard <= 0.5
+  pass_when: true
+  predicate: 'len(candidate_definitions) >= 2
+
+    and variants_are_member_set_changes      # 禁仅权重缩放(S15-C §4.2.3)
+
+    and rationale_not_based_on_effect_size
+
+    '
+  requires_tools: []
+  substantive_change: '|supp(W) △ supp(W'')| / |supp(W) ∪ supp(W'')| >= 0.5,排除部分归零中间态'
+  version: 1.8+
+- decidable: auto
+  id: V5DECL
+  inputs:
+  - manuscript_sections
+  items:
+  - 伦理批准
+  - 知情同意
+  - 数据共享
+  - 代码共享
+  - AI使用披露
+  - 利益冲突
+  - 作者贡献
+  - 资助
+  - 注册号
+  - 报告规范声明
+  name: 声明与披露清单
+  on_fail:
+    action: V5不通过,不得投稿
+    blocking: true
+  pass_when: true
+  predicate: all_declared(manuscript_sections, 10_items)
+  requires_tools:
+  - section_scan
+  version: 1.8+
+- decidable: hybrid
+  id: T19
+  inputs:
+  - 空间坐标矩阵
+  - 注释结果
+  judge_rubric: 人工判定:①推断单位是 spot 还是细胞——必须全文一致,禁止混用;②去卷积方法是否预注册且参考集来源声明;③是否报告空间自相关(Moran's I 等),未检验而直接做差异=伪重复;④邻域分析是否声明邻域定义(半径/KNN)。缺①或③直接不通过。
+  name: 空间转录组(10x Visium/Xenium/CosMx)
+  on_fail: R6 硬阻断(伪重复)
+  predicate: 空间项目须声明:①推断单位(spot / 细胞);②去卷积方法(cell2location/RCTD);③空间自相关是否检验;④邻域分析方法
+  stage_tag: spatial
+- decidable: hybrid
+  id: T20
+  inputs:
+  - 稿件
+  - 目标期刊 Guide
+  judge_rubric: 人工判定:①是否选定适用的报告规范(预测模型→TRIPOD;观察性→STROBE;肿瘤标志物→REMARK);②是否产出逐条对照表;③未覆盖条目是否给出理由;④声明块(伦理/知情同意/数据共享/代码共享/AI使用/利益冲突/作者贡献)是否齐全。缺②直接不通过。
+  name: 报告规范对照(TRIPOD/STROBE/REMARK)
+  on_fail: 退回补充对照表
+  predicate: 投稿前须逐条对照目标报告规范,缺项须声明理由或补充;不得声称'已符合'而无对照表
+  stage_tag: reporting
+- decidable: auto
+  id: WP-1
+  name: 标题不越界
+  note: 守卫 writing_guard.py;变异用例:加'揭示'→ FAIL
+  on_fail: F3
+  predicate: 标题不含升级词/无信息词, 字数合规, 含对象+发现
+  stage_tag: writing
+- decidable: auto
+  id: WP-2
+  name: 摘要首句为 P1
+  note: NC-6;与 WP-6.1 构成'同一真相两处一致'的对称守卫
+  on_fail: F3
+  predicate: 摘要首句 == P1 且四段齐全, 末句含边界, 含样本量
+  stage_tag: writing
+- decidable: auto
+  id: WP-3
+  name: 背景文献可核验
+  note: 第三态:返 0 篇判 N/A, 不降级为 AI 生成
+  on_fail: F3
+  predicate: 引言引用 ∈ research_survey_skill 输出;skill 返 0 篇 → N/A
+  stage_tag: writing
+- decidable: auto
+  id: WP-4
+  name: 材料方法可复现
+  note: 版本/批号;预注册偏差声明;统计含单双侧+校正;伦理;数据共享;power 依据
+  on_fail: F3
+  predicate: 每步带版本或批号;预注册偏离已声明;含 单侧/双侧 + BH|Bonferroni|FDR;数据共享登录号
+  stage_tag: writing
+- decidable: auto
+  id: WP-5a
+  name: 结果文字有台账锚
+  note: v2.15 修:窗口由固定 50 字符改为同句内(跨句曾致误判)
+  on_fail: F3
+  predicate: 每个'显著'**同句内**有 [L-xxx];不含机制词;阴性显式
+  stage_tag: writing
+- decidable: auto
+  id: WP-5c
+  name: 图注必含项
+  note: 对齐作图规范 §D
+  on_fail: F3
+  predicate: 图注含精确 n / 误差棒+中心 / 检验方法;≤250 字
+  stage_tag: writing
+- decidable: auto
+  id: WP-5b
+  name: 图表排版
+  note: 图号连续/先引用后出现/引用距离 ≤3 段/多面板 a,b,c
+  on_fail: F3
+  predicate: 图号连续无缺;先引用后出现;图与引用段落 ≤3 段
+  stage_tag: writing
+- decidable: auto
+  id: WP-5d
+  name: 图表标题
+  note: 无信息词黑名单;图题 ≤15 字;图题 ≠ 图注首句;图题数 == 图号数
+  on_fail: F3
+  predicate: 图题无 '主要结果/相关分析';≤15 字;≠ 图注首句;数量与图号相等
+  stage_tag: writing
+- decidable: auto
+  id: WP-6
+  name: 讨论首段为 P1
+  note: NC-3 / NC-2
+  on_fail: F3
+  predicate: 首段首句 == P1;含局限(P3)与展望(P4);机制词同句内 (Ld)
+  stage_tag: writing
+- decidable: auto
+  id: WP-7
+  name: 引用闭合
+  on_fail: F3
+  predicate: 无'用而未引'且无'引而未用';每条含 DOI/PMID
+  stage_tag: writing
+- decidable: auto
+  id: WP-8
+  name: 去 AI 味(初步过滤)
+  note: 仅过滤可判定模式特征;不追求'彻底去味'(边界模糊, 人工)
+  on_fail: 警告
+  predicate: 模板句式 0;空洞表达 0;过渡词 ≤3/千字;段落长度 sd ≥30
+  stage_tag: writing
+- decidable: auto
+  id: WP-9
+  name: 三格式导出一致
+  note: 守卫 export_guard.py
+  on_fail: F3
+  predicate: 三版本图号集合一致;占位符数==图表数;图注逐字一致;≥300dpi
+  stage_tag: writing
+- decidable: auto
+  id: T21
+  inputs:
+  - group_sizes
+  name: 组别样本量下限与平衡(三态)
+  note: '文献17 Table1 实证:RA 16 vs 4(对照仅4例)、T1D 10 vs 6(临界)。
+
+    在 n=4 对照上做 limma+BH,功效极低却照常报告"显著差异"。
+
+    脚本:literature_gap.check_T21。三态(与 H-2 双阈值同构)。
+
+    '
+  on_fail:
+    action: fail=禁止据此下结论;warn=须声明小样本并做敏感性分析,不得直接判通过
+    blocking: true
+  pass_when: verdict=='pass'
+  predicate: 'min(group_sizes)>=10 and max(group_sizes)/min<=4  -> pass
+
+    6<=min<10                                          -> warn(灰区)
+
+    min<6  or  max/min>4                               -> fail
+
+    '
+  requires_tools: []
+  stage_tag: qc
+  version: 2.16+
+- decidable: auto
+  id: T22
+  inputs:
+  - auc_train
+  - auc_ext
+  name: 训练-外部验证性能落差
+  note: '文献18 实证:训练集 AUC 0.666,外部验证 0.560(落差0.106),
+
+    C-index 0.631(95%CI 0.580-0.652),论文仍称"confirmed predictivity"。
+
+    "有验证集"≠"泛化成立"。脚本:literature_gap.check_T22。
+
+    '
+  on_fail:
+    action: 强制声明泛化性不足;禁止使用'confirmed predictivity'类措辞
+    blocking: true
+  pass_when: true
+  predicate: '(auc_train-auc_ext)<=0.10 and auc_ext>=0.60 -> pass else fail
+
+    '
+  requires_tools: []
+  stage_tag: performance
+  version: 2.16+
+- decidable: auto
+  id: T23
+  inputs:
+  - qc_thresholds
+  - rationale
+  name: 多数据集QC阈值一致性(须声明)
+  note: '文献19:自产 snRNA >2.5% mito;GSE243981 用 5%(snRNA)/25%(scRNA)。
+
+    阈值不同本身合理(模态不同),但必须声明,否则读者无法区分
+
+    差异来自生物学还是 QC。脚本:literature_gap.check_T23。
+
+    '
+  on_fail:
+    action: 须声明不同阈值的理由(如模态差异);未声明不得直接合并
+    blocking: false
+  pass_when: true
+  predicate: '阈值统一 -> pass
+
+    阈值不同 且 rationale 非空 -> pass(已声明)
+
+    阈值不同 且 rationale 为空 -> fail
+
+    '
+  requires_tools: []
+  stage_tag: qc
+  version: 2.16+
+- decidable: auto
+  id: T24
+  inputs:
+  - same_cohort
+  - independent
+  name: 验证集独立性(同队列split=数据泄露)
+  note: '文献19 明确:"To avoid potential data leakage artifacts inherent to
+
+    train-test splits within our specific mouse cohort, we prioritized
+
+    cross-species validation"。脚本:literature_gap.check_T24。
+
+    '
+  on_fail:
+    action: 同队列 split 须声明泄露风险,或改独立队列/跨物种验证
+    blocking: true
+  pass_when: true
+  predicate: 'independent==true -> pass(独立队列/跨物种)
+
+    same_cohort==true -> fail(验证集与训练集同队列)
+
+    未声明            -> fail
+
+    '
+  requires_tools: []
+  stage_tag: prediction
+  version: 2.16+
+- decidable: auto
+  id: T25
+  inputs:
+  - roi_method
+  - blinded
+  - preregistered
+  name: 空间/ROI选择盲法或客观标准
+  note: '文献21:"we manually selected by location the hippocampal subfields"
+
+    (手动选区,未盲法)。正例文献19:"region selector was blinded to the
+
+    tissue samples'' genotype origin"。脚本:literature_gap.check_T25。
+
+    '
+  on_fail:
+    action: ROI 选择须盲法或预注册客观标准;否则判选择偏倚风险
+    blocking: false
+  pass_when: true
+  predicate: 'blinded==true or preregistered==true -> pass else fail
+
+    '
+  requires_tools: []
+  stage_tag: spatial
+  version: 2.16+
+- decidable: auto
+  graded_note: 'sig_frac 是**连续质量分**,不是二值开关。实测随信噪比单调:
+
+    0.760 / 0.643 / 0.327 / 0.297 / 0.207(流形由强到弱),纯噪声 0.003~0.013。
+
+    50% 门槛的含义是"低于此则降级为探索级",而非"合格线"。
+
+    '
+  id: T26
+  inputs:
+  - X_highdim
+  - Y_embedding
+  - n_embed
+  - n_null
+  - celltypes
+  invariants:
+  - n_embed >= 3 次**独立**嵌入(PCA 确定性,须用子样本拟合产生随机性)
+  - n_null >= 1;EES 必须用邻居身份分布(距离值分布对结构不敏感)
+  - p 小 = 结构可复现 = 真信号;p 大才是伪影 —— 方向勿反
+  name: 嵌入信号-噪声定量分离(EMBEDR)
+  on_fail:
+    action: 基于该嵌入的聚类/轨迹结论降级为**探索级**;某型不得用于下结论
+    blocking: false
+  pass_when: sig_frac >= 0.50 and 每个 celltype 的 p 中位数 <= 0.10
+  predicate: 'EES_i = KL(P_hi_i || P_lo_i)        # 邻居**身份**分布,非距离值分布
+
+    null  = marginal_resample(X) 嵌入后的 EES*   # 每列独立置换:留边缘、破联合
+
+    p_i   = P(EES*_null <= EES_i),跨 n_embed 次独立嵌入取均值
+
+    sig_frac = fraction(p_i < 0.01)
+
+    '
+  requires_tools:
+  - marginal_resampling
+  - kl_divergence
+  - embedding
+  stage_tag: embedding
+  version: 2.18+
+- claim_ceiling:
+    从头训练: 不得声称"跨数据集复现"(只是独立建模)
+    微调(n_calib>=20): 在该 SOP 下可复用
+    零样本迁移: 在目标数据上方向一致
+  decidable: auto
+  id: T27
+  inputs:
+  - strategy
+  - n_calib
+  - gt_source
+  - batch_overlap
+  - claim
+  - ever_tuned_on_target
+  invariants:
+  - n_calib < 20 时 DAISM-DNN 实测性能提升不显著
+  - 现有 T22 只判结果层落差,**不问模型怎么训练**;T27 补方法层
+  - '"在目标数据上调过参的两个 CI 当然会重叠" —— 那不是泛化,是泄漏'
+  name: 跨数据集泛化的条件匹配声明(DAISM-DNN / EpiTopics)
+  on_fail:
+    action: R3(声称零样本却调过参)或 R5(措辞越界);缺声明则补齐
+    blocking: false
+  pass_when: true
+  predicate: 'strategy ∈ {零样本迁移, 从头训练, 微调} 且已预注册
+
+    and (strategy==微调 → n_calib >= 20 and gt_source 非空)
+
+    and (strategy==零样本迁移 → ever_tuned_on_target 已声明且为 False)
+
+    and batch_overlap 非空
+
+    and (strategy==从头训练 → claim 不含"跨数据集复现/外部验证成功/独立队列验证")
+
+    '
+  requires_tools:
+  - batch_diagnostic
+  - calibration_record
+  stage_tag: replication
+  version: 2.18+
+- decidable: auto
+  id: T28
+  inputs:
+  - X
+  - module_of_gene
+  - ko_gene_idx
+  - n_subsample
+  - claim
+  - neg_ctrl_idx
+  invariants:
+  - 与 T17 分工:T17 判**参数选择**(分位数 vs 倍数),T28 判**流程可复现**
+  - 措辞纪律:一律写"计算扰动预测",禁止"功能验证/实验验证/已证实/证明"
+  - 只用 WT 数据即可(scTenifoldKnk 关键设计:无需 KO 样本)
+  name: 计算扰动的可复现流程(scTenifoldKnk)
+  on_fail:
+    action: rho < 0.3 判"不稳定,不采用";(e) 不可区分则特异性不成立
+    blocking: false
+  pass_when: 全部满足
+  predicate: '(a) 流程声明:网络构建 / 扰动施加(整行置0) / 差异比较
+
+    (b) 模块归属检验:DR 基因富集于 KO 基因所在模块,p < 0.05
+
+    (c) 重复稳健性:随机子抽样 >=10 次,扰动谱 Spearman rho >= 0.5
+
+    (d) 方向稳定性:KO 与过表达应对称
+
+    (e) 阴性对照:无关基因的扰动谱与目标基因显著不同(rho <= 0.7)
+
+    '
+  requires_tools:
+  - network_build
+  - manifold_alignment
+  - hypergeometric
+  stage_tag: perturbation
+  version: 2.18+
+- decidable: hybrid
+  id: T29
+  inputs:
+  - kind
+  - sensitive
+  - subgroup_n
+  - adequacy_claim
+  - risk_asymmetry
+  - clinical_claim
+  - exit_option
+  - privacy_absence_reported
+  judge_rubric: "判 N/A 的条件(须带理由,空理由 raise):\n  - 纯方法学(无人群数据)\n  - 回顾性公共数据(无法追溯采集过程)\n判定要点:**声称必须有举证支撑**\
+    \ —— 只写\"具代表性\"而无数字即判 fail。\n这是\"形式 vs 实质\"的贯彻:V5DECL 只查形式声明是否存在。\n"
+  name: 数据正义自查(Braun & Hummel)
+  on_fail:
+    action: '声称"代表性充分"但无子群样本量 → R5
+
+      未做 (b) 但声称"可临床转化" → **硬阻断**
+
+      未报告 (d) 且属敏感数据 → T29 不通过
+
+      '
+    blocking: true
+  pass_when: 四项举证齐全
+  pillars:
+  - (In)visibility
+  - (Dis)engagement
+  - Non-discrimination
+  predicate: '(a) 代表性不足群体 + 各子群体样本量已报告
+
+    (b) 承担不对称风险的群体已评估
+
+    (c) 退出选项已说明
+
+    (d) 敏感数据 → 因隐私不参与的人群及其缺失已报告
+
+    '
+  stage_tag: ethics
+  version: 2.18+
+- decidable: auto
+  id: T30
+  inputs:
+  - data_source
+  - data_flow
+  - features_visible
+  - withdraw
+  - secondary_use
+  - anon_claim
+  - anon_method
+  - gdpr_scope
+  - gdpr_article
+  invariants:
+  - PORT 核心:本地处理 + 特征可见性 + true informed consent + 可撤回
+  - '"匿名化"无方法名 = 空声明(k-anonymity / 差分隐私 / l-diversity / t-closeness)'
+  - 与 T29 分工:T29 问"人是否被公平对待",T30 问"流程是否合规"
+  na_when: 使用完全公开二次数据(如 TCGA)→ N/A + 声明来源
+  name: 数据治理声明(PORT)
+  on_fail:
+    action: R5 回退;补声明与法条
+    blocking: false
+  pass_when: 四项齐全且约束机制具体
+  predicate: '(a) 数据流向已说明(是否离开数据主体设备)
+
+    (b) 提取了哪些特征、被采集者能否审阅
+
+    (c) 撤回机制
+
+    (d) 二次使用约束
+
+    and (声称匿名化 → 必须给出具体方法)
+
+    and (GDPR 覆盖 → 必须引用具体法条)
+
+    '
+  requires_tools:
+  - governance_declaration
+  stage_tag: governance
+  version: 2.18+
+- conflict_note: 建议文档 §0 把 WCMI 标"缺口"、§4 说"属特征工程不吸收" —— 两者自相矛盾。调和:**不吸收 WCMI 的方法,但吸收它暴露的防错点**即"特征选择的位置",落为本条
+    T31。
+  decidable: auto
+  evidence:
+  - 肺癌4基因(Wen 2022, BMC Cancer 22:193):全队列 CIBERSORT+ESTIMATE+GO/KEGG+Cox+LASSO 选基因
+  - 卵巢癌2基因(Liang 2021, Front Oncol 11:711020):scRNA 定亚群 → bulk WGCNA+单因素Cox+LASSO
+  - ROMO1(Wang 2025, Funct Integr Genomics 25:91):whole blood bulk 上 DGE + LASSO
+  id: T31
+  inputs:
+  - selection_place
+  - n_outer
+  - n_inner
+  - tuned_hp_in_fold
+  - external_val
+  - perf_claim
+  - n_selected
+  - redundancy_reported
+  - max_abs_r
+  - frac_r_gt_0_9
+  invariants:
+  - 生信预后模型**头号 AUC 虚高源**:全数据集选基因 → 再同批样本 CV 评估
+  - T09 只管"性能评估不得用样本内概率",**不管特征选择本身的位置** —— 本条补此缺口
+  - 不得默认 nested:默认放行 = 空规(第11条陷阱形态①)
+  - 外部验证集可用 ≠ CV 估计无偏(与 T22 落差判据互补)
+  - ★ v2.20 扩展(WCMI 启示):选择位置正确 ≠ 特征集可用 —— 高冗余(|r|>0.9)
+    特征集同样虚高性能且无法解释,是本判据的另一半
+  na_when: 非建模类研究(纯差异表达 / 纯方法学)→ N/A + 理由
+  name: 特征选择与超参必须在评估折叠内(含冗余度)
+  on_fail:
+    action: 判"含选择泄露,性能估计乐观";若同时声称高性能 → 追加 R5
+    blocking: false
+  pass_when: selection_place ∈ {nested(带折数), 独立选择集} 且 (e) 满足
+  predicate: '(a) 必须声明特征选择的执行位置;未声明 → 判"判不了"(不得默认 nested)
+
+    (b) nested / 独立选择集 → 通过
+
+    (c) 全数据集一次性选择(outer) → 不通过
+
+    (d) 声称 nested 但给不出外层/内层折数 → 视为未声明(判不了)
+
+    (e) 超参调优同样须在训练折内
+
+    (f) 全数据集选择 + 声称高性能 → 追加 R5 措辞越界
+
+    (g) 有外部验证集时:该集性能可用,但训练-CV 性能仍须标"乐观"
+
+    (h) 冗余度(触发:给出选中特征数):必须报告特征间相关矩阵;
+        未报告 → 判"不完整"
+
+    (i) |r| > 0.9 的特征对占比 > 30% → 冗余过高,须去冗余
+        (mRMR / 条件互信息 / VIF 剔除)后重跑;10%~30% 为灰区
+
+    '
+  requires_tools:
+  - nested_cv_declaration
+  stage_tag: modeling
+  version: 2.20+
+- decidable: auto
+  evidence:
+  - ROMO1(Wang 2025, Funct Integr Genomics 25:91):two-sample MR,原文未报告 F 统计量 / 多效性检验 / 祖源匹配 → T32 判不通过
+  id: T32
+  inputs:
+  - is_mr
+  - f_stat
+  - iv_count
+  - independence_declared
+  - pleiotropy_test
+  - pleiotropy_present
+  - heterogeneity_reported
+  - two_sample
+  - ancestry_matched
+  - exposure_gwas_is_discovery
+  - causal_claim
+  invariants:
+  - ★ 建议文档 §0 写"有 MR 但无判据" —— 实测 grep:MR / 孟德尔 / mendel **均 0 次**,框架此前**根本没有 MR**(不是"有而缺判据")。建议此处事实有误,已记录。
+  - MR 三假设缺一即因果推断不成立;F<10 的弱工具变量向混杂偏倚收缩
+  - two-sample MR 祖源不匹配 = 人群结构混杂,IV-暴露关联不可迁移
+  na_when: 非 MR 研究 → N/A + 理由
+  name: 孟德尔随机化工具变量假设
+  on_fail:
+    action: 缺 (a)/(c) 判"判不了";(f) 不匹配 → 硬阻断;(h) 越界 → R5
+    blocking: true
+  pass_when: (a)(b)(c)(d)(e)(h) 全部满足;two-sample 时另需 (f)
+  predicate: '(a) 关联性:IV 与暴露强相关;F < 10 → 弱工具变量,判不确定
+
+    (b) 独立性:IV 与混杂无关(人群分层须主成分校正)—— 须声明
+
+    (c) 排他性:水平多效性须检验(MR-Egger 截距 / MR-PRESSO / 加权中位数)
+
+    (d) 多效性存在时须用稳健方法(median / mode / PRESSO 校正后)
+
+    (e) 异质性(Cochran Q / I²)须报告
+
+    (f) two-sample MR:两样本祖源必须匹配 → 不匹配**硬阻断**
+
+    (g) IV-暴露关联若来自同一 GWAS 发现集 → Winner''s curse 须声明
+
+    (h) 措辞:MR 只能"提示/支持因果",禁"证明/证实因果"
+
+    '
+  requires_tools:
+  - mr_iv_diagnostics
+  stage_tag: causal
+  version: 2.19+
+- decidable: auto
+  id: T33
+  inputs:
+  - prop
+  - n_total
+  - k
+  - ci_reported
+  - relative_ci_width
+  - claim
+  - observation_window
+  - target_prob
+  - n_obs
+  - tail_method
+  invariants:
+  - T16 只管每 (donor,celltype) **细胞数**下限,**不管比例估计的 CI** —— 本条补此对称面
+  - 可解析概率下界 = 1/n。短记录**系统性低估尾部**(Dowling:1年→6年估计需求持续上升)
+  - ★实测 Wilson CI:5/10000 → CI [2.14e-4, 1.17e-3],相对宽度 1.913 > 1.0,上下界差 5.48 倍 → 硬阻断
+  - ★实测可解析性:1年(n=365)下界 2.74e-3 > 目标 1.37e-4 → 无法解析;39年(n=14235)下界 7.02e-5 → 可解析
+  na_when: 非稀有事件研究 → N/A + 理由;用 < 100 样本估 <1% 频率 → 判不了
+  name: 稀有/极端事件概率估计的样本量下限
+  on_fail:
+    action: 硬阻断(结论不可辨)或判不了
+    blocking: true
+  pass_when: CI 已报且相对宽度 <= 1.0;声称变化时上下界比值 <= 2;极端事件须可解析或已声明外推
+  predicate: "(a) 必须报告比例的 95% CI(Wilson / Clopper-Pearson / bootstrap)\n\n(b) CI 相对宽度\
+    \ > 100%(CI_width / point > 1.0)→ 判\"不足以估计\"\n\n(c) 必须声明观察/记录窗口长度,并说明是否足以捕获极端事件\n\
+    \n(d) 估极端事件概率(<1%)时经验分位数会系统性低估\n    → 须改用参数/半参数尾部外推(GPD / POT / EVT)\n\n硬阻断:声称比例变化但\
+    \ CI 上下界比值 > 2 → 两个方向都能容纳相反结论\n"
+  requires_tools:
+  - wilson_ci
+  - tail_extrapolation
+  stage_tag: rare_event
+  trigger: 比例 < 5% / 变异频率 < 1% / 极端事件概率 < 1%(三选一)
+  version: 2.20+
+- decidable: auto
+  id: T34
+  inputs:
+  - per_sample_uncertainty
+  - abs_error
+  - uncertainty_error_corr
+  - stratified_perf_reported
+  - high_uncert_subgroup
+  - claim
+  invariants:
+  - T12 只要求**模型层** CI,T13b 只要求**群体层**校准斜率 CI,**没有一条要求 per-sample 不确定性**
+  - Mannodi 材料 ML Figure 6A/B:不确定性 vs 绝对误差散点存在**高误差高不确定性尾部**
+  - 只报平均 RMSE 是平均性能,不告诉读者**哪些样本预测不可信** —— 高风险个体误判后果更严重
+  - ★实测 corr:信息性 0.892 vs 无信息 -0.031(把 corr<0.1 则无信息 从断言变为证据)
+  na_when: 非预测建模研究 → N/A + 理由
+  name: 预测不确定性的分层报告
+  on_fail:
+    action: 判不完整;声称个体风险时为硬阻断
+    blocking: false
+  pass_when: (a)(b) 齐全;(c) 触发时已分层;(d) 声称个体风险时有 per-sample CI 且 corr >= 0.1
+  predicate: "(a) 必须报告 per-sample 预测不确定性\n    (GPR 后验方差 / bootstrap 预测分布 / MC dropout)\n\
+    \n(b) 必须报告不确定性 vs 绝对误差关系(散点 + 相关系数)\n\n(c) corr > 0.3 → 必须报告分层性能:\n    低/高不确定组的\
+    \ AUC、校准、Brier 分别列\n\n(d) 声称可用于个体风险预测 → 必须报告 per-sample CI,\n    禁止只报群体平均 AUC\n\
+    \n不通过:只报单一平均性能 → 判不完整;\n        高风险亚群不确定性更高但未声明 → R5;\n        声称精确预测但 corr <\
+    \ 0.1 → 不确定性无信息\n"
+  requires_tools:
+  - uncertainty_estimation
+  - correlation
+  stage_tag: prediction
+  version: 2.20+
+- decidable: auto
+  id: T35
+  inputs:
+  - tools
+  - tool_versions
+  - ldsc_intercept
+  - ldsc_intercept_corrected
+  - mtag_vs_single_gwas_declared
+  - mtag_genetic_corr_claim
+  - coloc_posteriors
+  - coloc_prior_declared
+  - independent_validation
+  invariants:
+  - T32 管 MR,**不管 LDSC / MTAG / colocalization** —— 本条补此对称面
+  - LDSC:样本量 <10万时遗传相关性估计不稳;群体分层校正不充分会**系统高估**
+  - MTAG:**人为夸大遗传相关性**(多表型联合估计重复计算重叠样本信息)
+  - ★循环论证:用 MTAG 输出声称遗传相关性高 —— 该相关性是 MTAG 联合估计**定义**出来的
+  - ROMO1(Wang 2025)实测中招:用 LDSC + MTAG 但未报 intercept / 未声明 MTAG 不可比
+  na_when: 未使用多组学整合工具 → N/A + 理由;coloc H4>0.8 但先验未声明 → 判不了
+  name: 多组学整合工具的已知偏倚(LDSC/MTAG/coloc)
+  on_fail:
+    action: R5 回退;循环论证为硬阻断
+    blocking: false
+  pass_when: (a) 已声明;LDSC intercept 接近 1 或已校正;MTAG 已声明不可比;coloc 先验已声明;(e) 有独立验证
+  predicate: "(a) 每个工具必须声明版本与关键参数\n\n(b) LDSC:必须报告 intercept;偏离 1 说明混杂校正不足(>0.1 须校正)\n\
+    \n(c) MTAG:必须声明其结果与单个 GWAS 不可直接比较;\n    用其输出声称遗传相关性 = 循环论证\n\n(d) colocalization:必须报告\
+    \ H1/H2/H3/H4 后验与先验设置\n\n(e) 任何工具结果须有独立数据验证,不能只凭工具输出断言因果\n"
+  requires_tools:
+  - ldsc
+  - mtag
+  - coloc
+  stage_tag: multiomics
+  trigger: 使用 LDSC / MTAG / colocalization / SuSiE
+  version: 2.20+
+- decidable: auto
+  id: T36
+  name: 多组件整合的增量消融
+  note: |
+    ★ 与 T31 分工,禁止合并:T31 静态判"特征集内部冗余"(看相关系数);
+    T36 动态判"组件之间增益"(看 ΔAUC/ΔC-index)。
+    锚定文献:ROMO1(Wang 2025)/p53(Wang)/Lage-Rupprecht —— 三篇均
+    声称"整合有用"但**未做消融**。
+  on_fail: 硬阻断(与 T13 同规)
+  na_when: 单组件研究(未做多组学/多算法/多特征集整合)
+  predicate: |
+    reported(perf_full) and reported(perf_single, every component)
+    and reported(perf_loo, every component)
+    and for each c: delta_c = perf_full - perf_loo[c]
+    delta_c >= 0.01 and CI_c 不跨 0 → 该组件有贡献
+    任一组件无贡献仍声称"整合带来提升" → R5 回退
+    全部组件无贡献 → 硬阻断(循环论证)
+  stage_tag: integration
+- decidable: auto
+  id: V4MODAL
+  inputs:
+  - in_silico
+  - independent_direction
+  - in_vitro
+  - in_vivo
+  - clinical
+  - claim
+  invariants:
+  - V4 原只做主张-证据形式匹配,**无跨模态强度阶梯** —— 本条补上(Lage-Rupprecht 药物重定位)
+  - 铁律:**不得跨级主张**。in silico + in vitro 不等于治疗有效,只能说细胞模型中有活性
+  - ★词表必须**互斥**(每词只归属一个等级):初版 L1/L2 上限均含候选,导致 L1 达成却声称候选被误判跨级到 L2 —— v2.20 修正
+  na_when: 非跨模态验证研究 → N/A + 理由;未报告任何模态证据 → 判不了
+  name: 跨模态验证强度分级(不得跨级主张)
+  on_fail:
+    action: R5 措辞越界
+    blocking: false
+  pass_when: 声称等级 <= 达成等级
+  predicate: "阶梯:L1 in silico → L2 独立数据方向一致 → L3a in vitro\n      → L3b in vivo →\
+    \ L4 clinical\n\n判定:声称所需等级 > 实际达成等级 → 跨级主张,不通过\n\nL1 允许候选/预测;L2 允许方向一致;L3a 允许细胞模型中;\n\
+    L3b 允许动物模型中;L4 才允许临床效用/治疗有效\n"
+  requires_tools: []
+  stage_tag: validation
+  version: 2.20+
+- decidable: auto
+  id: T37
+  inputs:
+  - criteria_dist
+  - criteria_total
+  name: 判据体系的骨架/休眠比例(L2 消融的判定层)
+  note: |
+    ★ v2.23 补最后一层:v2.22 产出了 criteria_dist(体温表),但**没有
+      一条判据来读这张表并下诊断** —— 骨架/休眠比例可以自我声明,
+      无独立检查。这是第 11 条陷阱在**判据层**的残留形态:不是
+      "守卫从未 FAIL",而是"判据层结构健康度无独立检查"。
+    ★ 判定项来源:T37 的判定项由 ablation.py 产生(不在 verify_all 的
+      ledger 里),因为它的输入 criteria_dist 恰由 verify_all 生成 ——
+      若在 verify_all 内实现,统计自己的分布会改变分布(自指)。
+      故由下游 ablation.py 判定,与"附录由 gen_appendix 生成"同构。
+  on_fail:
+    action: 判"判据膨胀",新增判据须先论证必要性
+    blocking: true
+  na_when: 无(每次主验证运行均须判定,不接受 N/A)
+  pass_when: 休眠率 == 0 且 GLOBAL 占比 < 10% 且无垄断判据
+  predicate: |
+    休眠率 = 休眠判据数 / 判据总数
+    休眠判据 := n_direct == 0 且 n_branch == 0(从未被任何判定项归因)
+
+    三态(与 H-2 双阈值同构,不是二值):
+      休眠率 == 0        → pass
+      0 < 休眠率 < 20%   → warn(须逐条声明休眠原因)
+      休眠率 >= 20%      → fail(判"判据膨胀")
+    附加:
+      GLOBAL 占比 >= 10%            → warn(归因稀释)
+      单条判据 n_direct/总判定项 > 40% → warn(垄断)
+  invariants:
+  - 判据层的健康度必须由独立判据判定,不得自我声明
+  - 三态判定 pass/warn/fail,禁止压缩为二值(与 H-2 双阈值同构)
+  - ★ 自指口径:T37 自身**排除**在休眠统计外(分子分母均排除)。
+      与既有自指处理同规:report_guard 不计入自身合法集、链文件不登记
+      自身 sha256、MANIFEST 不写自身哈希。若把自己算进去,等于
+      "T37 用自己给自己打的分数判定自己" —— 正是框架要防的自证。
+      "消融是否在流程里"由 build STAGES 的 rc 保证,不由 T37 兜底。
+  requires_tools:
+  - ablation
+  stage_tag: meta
+  version: 2.23+
+
+invariants:
+- 硬阻断9条
+- R1-R6 定义
+- 措辞硬规则
+- 禁止 LLM 生成数字:所有数字必须来自脚本输出
+- 禁止软化判定:不得把'不通过'说成'部分通过'
+- ack=null 不算交接完成
+tools:
+  pdf_forensics:
+    backends:
+      poppler:
+        authoritative: true
+        commands:
+        - pdffonts
+        - pdftotext
+        - pdfimages
+        - pdfinfo
+      pypdf_recursive:
+        authoritative: false
+        known_blind_spots:
+        - 'encrypted: pypdf 抛 PdfReadError —— 严禁 except 吞掉后判合规(假通过)'
+        - 'xref_stream: 跨引用表流解析偶发失败,poppler 更稳健'
+        - 'cidfont_no_tounicode: extract_text() 返回空 → 误判''无文本层''(假不通过)'
+        - 'xfa: XFA 表单内图像/字体,pypdf 递归不覆盖'
+        module: pypdf
+        must_annotate: 'detection_backend: pypdf'
+        on_blind_spot: 判'判不了'(blocking),不得降级为通过 —— 与 on_unavailable 同规
+    on_unavailable: fail_with_reason
+    output_schema:
+      blocking_level: int
+      detection_backend: str
+      evidence:
+      - str
+      expected: any
+      observed: any
+      passed: bool
+    priority:
+    - poppler
+    - pypdf_recursive
+    - fail
+    require_raw_stdout: true
+version: 1.8+

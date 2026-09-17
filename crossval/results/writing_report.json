@@ -1,0 +1,536 @@
+{
+  "rows": [
+    {
+      "branch": "WP-CORE",
+      "sub": "WP-CORE",
+      "item": "P1 长度在区间",
+      "observed": "86",
+      "expected": "20–300",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-CORE"
+    },
+    {
+      "branch": "WP-1",
+      "sub": "WP-1.1",
+      "item": "标题无升级词(除非正文 L3+)",
+      "observed": "无",
+      "expected": "无",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-1"
+    },
+    {
+      "branch": "WP-1",
+      "sub": "WP-1.2",
+      "item": "标题无无信息词",
+      "observed": "无",
+      "expected": "无",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-1"
+    },
+    {
+      "branch": "WP-1",
+      "sub": "WP-1.4",
+      "item": "标题字数",
+      "observed": "20",
+      "expected": "≤25",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-1"
+    },
+    {
+      "branch": "WP-1",
+      "sub": "WP-1.6",
+      "item": "标题含对象+发现",
+      "observed": "len>0",
+      "expected": ">0",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-1"
+    },
+    {
+      "branch": "WP-2",
+      "sub": "WP-2.1",
+      "item": "摘要首句 == P1(NC-6)",
+      "observed": "一致",
+      "expected": "一致",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-2"
+    },
+    {
+      "branch": "WP-2",
+      "sub": "WP-2.2",
+      "item": "摘要四段齐全",
+      "observed": "齐全",
+      "expected": "齐全",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-2"
+    },
+    {
+      "branch": "WP-2",
+      "sub": "WP-2.6",
+      "item": "末句含边界词",
+      "observed": "True",
+      "expected": "True",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-2"
+    },
+    {
+      "branch": "WP-2",
+      "sub": "WP-2.7",
+      "item": "摘要含样本量 n",
+      "observed": "True",
+      "expected": "True",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-2"
+    },
+    {
+      "branch": "WP-3",
+      "sub": "WP-3.1",
+      "item": "文献来自 research_survey_skill",
+      "observed": "n_found=8 · 8 篇",
+      "expected": "已提供且可核验",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-3"
+    },
+    {
+      "branch": "WP-3",
+      "sub": "WP-3.2",
+      "item": "无幻觉文献(引用 ∈ skill 输出)",
+      "observed": "无",
+      "expected": "无",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-3"
+    },
+    {
+      "branch": "WP-3",
+      "sub": "WP-3.4",
+      "item": "含 gap statement",
+      "observed": "True",
+      "expected": "True",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-3"
+    },
+    {
+      "branch": "WP-4",
+      "sub": "WP-4.1",
+      "item": "含版本/批号",
+      "observed": "True",
+      "expected": "True",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-4"
+    },
+    {
+      "branch": "WP-4",
+      "sub": "WP-4.3a",
+      "item": "统计含单/双侧",
+      "observed": "True",
+      "expected": "True",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-4"
+    },
+    {
+      "branch": "WP-4",
+      "sub": "WP-4.3b",
+      "item": "统计含多重校正",
+      "observed": "True",
+      "expected": "True",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-4"
+    },
+    {
+      "branch": "WP-4",
+      "sub": "WP-4.7",
+      "item": "数据共享/登录号",
+      "observed": "True",
+      "expected": "True",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-4"
+    },
+    {
+      "branch": "WP-4",
+      "sub": "WP-4.2",
+      "item": "预注册偏差显式声明",
+      "observed": "True",
+      "expected": "True",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-4"
+    },
+    {
+      "branch": "WP-4",
+      "sub": "WP-4.5",
+      "item": "伦理批准号(涉人/动物)",
+      "observed": "True",
+      "expected": "True",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-4"
+    },
+    {
+      "branch": "WP-4",
+      "sub": "WP-4.8",
+      "item": "样本量/power 依据",
+      "observed": "True",
+      "expected": "True",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-4"
+    },
+    {
+      "branch": "WP-5a",
+      "sub": "WP-5a.1",
+      "item": "每个'显著'邻近有 [L-xxx]",
+      "observed": "无",
+      "expected": "无",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-5a"
+    },
+    {
+      "branch": "WP-5a",
+      "sub": "WP-5a.2",
+      "item": "结果节不含机制词",
+      "observed": "无",
+      "expected": "无",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-5a"
+    },
+    {
+      "branch": "WP-5a",
+      "sub": "WP-5a.4",
+      "item": "阴性结果显式出现",
+      "observed": "True",
+      "expected": "True",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-5a"
+    },
+    {
+      "branch": "WP-5b",
+      "sub": "WP-5b.1",
+      "item": "图号连续无缺",
+      "observed": "无缺",
+      "expected": "无缺",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-5b"
+    },
+    {
+      "branch": "WP-5c",
+      "sub": "WP-5c.n",
+      "item": "逐图:图注含精确 n",
+      "observed": "无缺",
+      "expected": "无缺",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-5c"
+    },
+    {
+      "branch": "WP-5c",
+      "sub": "WP-5c.eb",
+      "item": "逐图:图注定义误差棒+中心",
+      "observed": "无缺",
+      "expected": "无缺",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-5c"
+    },
+    {
+      "branch": "WP-5c",
+      "sub": "WP-5c.test",
+      "item": "逐图:图注含检验方法",
+      "observed": "无缺",
+      "expected": "无缺",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-5c"
+    },
+    {
+      "branch": "WP-5c",
+      "sub": "WP-5c.2",
+      "item": "逐图:图注 ≤250 字",
+      "observed": "无超",
+      "expected": "无超",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-5c"
+    },
+    {
+      "branch": "WP-5c",
+      "sub": "WP-5c.count",
+      "item": "图注条数 == 图号数",
+      "observed": "4",
+      "expected": ">0",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-5c"
+    },
+    {
+      "branch": "WP-5d",
+      "sub": "WP-5d.1",
+      "item": "图题无无信息词",
+      "observed": "无",
+      "expected": "无",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-5d"
+    },
+    {
+      "branch": "WP-5d",
+      "sub": "WP-5d.2",
+      "item": "逐条:图题字数 ≤15",
+      "observed": "无超",
+      "expected": "无超",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-5d"
+    },
+    {
+      "branch": "WP-5d",
+      "sub": "WP-5d.count",
+      "item": "图题数 == 图号数",
+      "observed": "4/4",
+      "expected": "4/4",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-5d"
+    },
+    {
+      "branch": "WP-6",
+      "sub": "WP-6.1",
+      "item": "讨论首段 == P1(NC-3)",
+      "observed": "一致",
+      "expected": "一致",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-6"
+    },
+    {
+      "branch": "WP-6",
+      "sub": "WP-6.2",
+      "item": "含局限性(P3)",
+      "observed": "True",
+      "expected": "True",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-6"
+    },
+    {
+      "branch": "WP-6",
+      "sub": "WP-6.3",
+      "item": "含展望(P4)",
+      "observed": "True",
+      "expected": "True",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-6"
+    },
+    {
+      "branch": "WP-6",
+      "sub": "WP-6.4",
+      "item": "机制词邻近有 (Ld) 标注",
+      "observed": "无",
+      "expected": "无",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-6"
+    },
+    {
+      "branch": "WP-7c",
+      "sub": "WP-7c.1a",
+      "item": "无'用而未引'",
+      "observed": "无",
+      "expected": "无",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-7"
+    },
+    {
+      "branch": "WP-7c",
+      "sub": "WP-7c.1b",
+      "item": "无'引而未用'",
+      "observed": "无",
+      "expected": "无",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-7"
+    },
+    {
+      "branch": "WP-7b",
+      "sub": "WP-7b.2",
+      "item": "每条含 DOI/PMID",
+      "observed": "True",
+      "expected": ">0",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-7"
+    },
+    {
+      "branch": "WP-8",
+      "sub": "WP-8.1",
+      "item": "无模板句式",
+      "observed": "无",
+      "expected": "无",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-8"
+    },
+    {
+      "branch": "WP-8",
+      "sub": "WP-8.2",
+      "item": "无空洞表达",
+      "observed": "无",
+      "expected": "无",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-8"
+    },
+    {
+      "branch": "WP-8",
+      "sub": "WP-8.3",
+      "item": "过渡词密度",
+      "observed": "0.68",
+      "expected": "≤3/千字",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-8"
+    },
+    {
+      "branch": "WP-8",
+      "sub": "WP-8.4",
+      "item": "段落长度标准差",
+      "observed": "244.8",
+      "expected": "≥30",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-8"
+    },
+    {
+      "branch": "WP-8",
+      "sub": "WP-8.9",
+      "item": "元话语密度",
+      "observed": "0.0",
+      "expected": "≤1/千字",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-8"
+    }
+  ],
+  "n_pass": 43,
+  "n_fail": 0,
+  "n_na": 0,
+  "criteria_dist": {
+    "WP-CORE": {
+      "n_direct": 1,
+      "n_branch": 0,
+      "n_na": 0,
+      "branches": [
+        "WP-CORE"
+      ]
+    },
+    "WP-1": {
+      "n_direct": 4,
+      "n_branch": 0,
+      "n_na": 0,
+      "branches": [
+        "WP-1"
+      ]
+    },
+    "WP-2": {
+      "n_direct": 4,
+      "n_branch": 0,
+      "n_na": 0,
+      "branches": [
+        "WP-2"
+      ]
+    },
+    "WP-3": {
+      "n_direct": 3,
+      "n_branch": 0,
+      "n_na": 0,
+      "branches": [
+        "WP-3"
+      ]
+    },
+    "WP-4": {
+      "n_direct": 7,
+      "n_branch": 0,
+      "n_na": 0,
+      "branches": [
+        "WP-4"
+      ]
+    },
+    "WP-5a": {
+      "n_direct": 3,
+      "n_branch": 0,
+      "n_na": 0,
+      "branches": [
+        "WP-5a"
+      ]
+    },
+    "WP-5b": {
+      "n_direct": 1,
+      "n_branch": 0,
+      "n_na": 0,
+      "branches": [
+        "WP-5b"
+      ]
+    },
+    "WP-5c": {
+      "n_direct": 5,
+      "n_branch": 0,
+      "n_na": 0,
+      "branches": [
+        "WP-5c"
+      ]
+    },
+    "WP-5d": {
+      "n_direct": 3,
+      "n_branch": 0,
+      "n_na": 0,
+      "branches": [
+        "WP-5d"
+      ]
+    },
+    "WP-6": {
+      "n_direct": 4,
+      "n_branch": 0,
+      "n_na": 0,
+      "branches": [
+        "WP-6"
+      ]
+    },
+    "WP-7": {
+      "n_direct": 3,
+      "n_branch": 0,
+      "n_na": 0,
+      "branches": [
+        "WP-7b",
+        "WP-7c"
+      ]
+    },
+    "WP-8": {
+      "n_direct": 5,
+      "n_branch": 0,
+      "n_na": 0,
+      "branches": [
+        "WP-8"
+      ]
+    }
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "rows": [
+    {
+      "branch": "WP-9",
+      "sub": "T9.1",
+      "item": "三版本图号集合一致",
+      "observed": "A=[1, 2, 3] B=[1, 2, 3] P=[1, 2, 3]",
+      "expected": "三者相同",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-9"
+    },
+    {
+      "branch": "WP-9",
+      "sub": "T9.2",
+      "item": "占位符数 == docx-B 图表数",
+      "observed": "3 vs 3",
+      "expected": "相等",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-9"
+    },
+    {
+      "branch": "WP-9",
+      "sub": "T9.3",
+      "item": "docx-B 图注 ⊂ pdf(逐字)",
+      "observed": "全部命中",
+      "expected": "无缺失",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-9"
+    },
+    {
+      "branch": "WP-9",
+      "sub": "T9.4",
+      "item": "图与引用段落邻近",
+      "observed": "无",
+      "expected": "无",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-9"
+    },
+    {
+      "branch": "WP-9",
+      "sub": "T9.5",
+      "item": "三版本参考文献逐字一致",
+      "observed": "相同",
+      "expected": "相同",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-9"
+    },
+    {
+      "branch": "WP-9",
+      "sub": "T9.5b.A",
+      "item": "参考文献条目不重复(A)",
+      "observed": "无重复",
+      "expected": "无重复",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-9"
+    },
+    {
+      "branch": "WP-9",
+      "sub": "T9.5b.B",
+      "item": "参考文献条目不重复(B)",
+      "observed": "无重复",
+      "expected": "无重复",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-9"
+    },
+    {
+      "branch": "WP-9",
+      "sub": "T9.5b.P",
+      "item": "参考文献条目不重复(P)",
+      "observed": "无重复",
+      "expected": "无重复",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-9"
+    },
+    {
+      "branch": "WP-9",
+      "sub": "T9.6",
+      "item": "图片分辨率",
+      "observed": "300",
+      "expected": "≥300",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-9"
+    },
+    {
+      "branch": "WP-9",
+      "sub": "T9.7",
+      "item": "三版本 sha256 可固定",
+      "observed": "6fb7b8f340a5",
+      "expected": "非空",
+      "passed": true,
+      "na": false,
+      "criteria": "WP-9"
+    }
+  ],
+  "n_pass": 10,
+  "n_fail": 0,
+  "n_na": 0,
+  "criteria_dist": {
+    "WP-9": {
+      "n_direct": 10,
+      "n_branch": 0,
+      "n_na": 0,
+      "branches": [
+        "WP-9"
+      ]
+    }
+  }
+}

@@ -1,6 +1,0 @@
-acc=GSE31210
-fetched_at=2026-09-17T10:47:30+0800
-n_samples=246
-groups={'tumor': 226, 'normal': 20}
-claim=226 LUAD tumor + 20 normal
-evidence=['GSM773540: KH024 -> tumor', 'GSM773541: KH081 -> tumor', 'GSM773542: KH007 -> tumor', 'GSM773543: KH066 -> tumor', 'GSM773544: KH012 -> tumor', 'GSM773545: KH027 -> tumor']

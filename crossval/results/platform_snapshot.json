@@ -1,0 +1,60 @@
+{
+  "schema": "platform_snapshot/v1",
+  "generated_at": "2026-09-12T20:34:44.118752+08:00",
+  "platform": {
+    "system": "Windows",
+    "release": "11",
+    "machine": "AMD64",
+    "python": "3.13.14",
+    "implementation": "CPython",
+    "filesystem_encoding": "utf-8",
+    "default_encoding": "utf-8",
+    "utc_offset_hours": 8.0
+  },
+  "paths": {
+    "sep": "\\",
+    "altsep": "/",
+    "pathsep": ";",
+    "case_sensitive_filesystem": false,
+    "backslash": {
+      "backslash_is_separator": true,
+      "probe": "not_creatable"
+    }
+  },
+  "packages": {
+    "numpy": "2.5.0",
+    "scipy": "1.18.1",
+    "sklearn": "1.9.1",
+    "pandas": "3.0.5",
+    "matplotlib": "3.11.0",
+    "pypdf": "6.18.0",
+    "yaml": "6.0.3",
+    "pytest": "9.1.1",
+    "PIL": "12.3.0"
+  },
+  "cjk_font": {
+    "available": [
+      "FangSong",
+      "Microsoft JhengHei",
+      "Microsoft JhengHei Light",
+      "Microsoft JhengHei UI",
+      "Microsoft JhengHei UI Light",
+      "Microsoft YaHei",
+      "Microsoft YaHei Light",
+      "Microsoft YaHei UI",
+      "Microsoft YaHei UI Light",
+      "Noto Sans SC",
+      "Noto Sans SC Medium",
+      "STSong",
+      "SimHei"
+    ],
+    "chosen": "DejaVu Sans",
+    "cjk_count": 13
+  },
+  "env": {
+    "TZ": null,
+    "LANG": "en_US.UTF-8",
+    "PYTHONHASHSEED": null,
+    "MPLBACKEND": null
+  }
+}

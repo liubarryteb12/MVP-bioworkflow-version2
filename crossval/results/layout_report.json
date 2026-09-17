@@ -1,0 +1,588 @@
+{
+ "module": "V5-T",
+ "dormant_reason": "不适用 + 理由:未进入排版阶段(目标期刊未定 或 未开始按该期刊模板排版)",
+ "warnings": [],
+ "checks": [
+  {
+   "check": "C-1.1",
+   "item": "无孤儿图",
+   "observed": "无",
+   "expected": "无",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-1.2",
+   "item": "无悬空图引用",
+   "observed": "无",
+   "expected": "无",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-1.3",
+   "item": "无孤儿表",
+   "observed": "无",
+   "expected": "无",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-1.4",
+   "item": "无悬空表引用",
+   "observed": "无",
+   "expected": "无",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-1.5",
+   "item": "图序连续无缺号",
+   "observed": "[1, 2, 3]",
+   "expected": "1..N 连续",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-1.6",
+   "item": "补充材料编号连续无缺号",
+   "observed": "[1]",
+   "expected": "1..N 连续",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-2.1",
+   "item": "台账数字均可在正文定位",
+   "observed": "2/2",
+   "expected": "2/2",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-2.2",
+   "item": "无台账外数字",
+   "observed": "无",
+   "expected": "无",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-3.1",
+   "item": "压缩未删除限定词",
+   "observed": "无丢失",
+   "expected": "无丢失",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-3.2",
+   "item": "压缩未新增升级词",
+   "observed": "无新增",
+   "expected": "无新增",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-3.3",
+   "item": "限定词密度未崩塌(阈值可配)",
+   "observed": "82.5→101.3‰",
+   "expected": "降幅<40%",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-3.4",
+   "item": "限定词绝对计数未减少",
+   "observed": "8→8",
+   "expected": ">=8",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-4",
+   "item": "01_qc_violin_mito.pdf         ",
+   "observed": "合规",
+   "expected": "合规",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-4",
+   "item": "02_deg_volcano.pdf            ",
+   "observed": "合规",
+   "expected": "合规",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "01_qc_violin_mito.jpg    01_qc_violin_mito.jpg 体积合规",
+   "observed": "70KB",
+   "expected": "≤50MB(主图)",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "01_qc_violin_mito.jpg    01_qc_violin_mito.jpg dpi",
+   "observed": "300",
+   "expected": ">=300",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "01_qc_violin_mito.jpg    01_qc_violin_mito.jpg 色彩模式 RGB",
+   "observed": "RGB",
+   "expected": "RGB",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "01_qc_violin_mito.jpg    01_qc_violin_mito.jpg 宽度 <=183mm(双栏)",
+   "observed": "88.1",
+   "expected": "<=183",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "01_qc_violin_mito.jpg    命名匹配 02_deg_volcano.pdf",
+   "observed": "01_qc_violin_mito.jpg",
+   "expected": "02_deg_volcano.pdf",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "01_qc_violin_mito.jpg    analysis_step 属于框架阶段标签",
+   "observed": "qc",
+   "expected": "∈ ['batch', 'causal', 'dca', 'deg', 'embedding', 'enrichment', 'ethics', 'governance', 'imputation', 'integration', 'meta', 'modeling', 'multiomics', 'performance', 'perturbation', 'prediction', 'qc', 'rare_event', 'replication', 'reporting', 'sensitivity', 'spatial', 'survival', 'validation', 'writing']",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "01_qc_violin_mito.pdf    01_qc_violin_mito.pdf 体积合规",
+   "observed": "14KB",
+   "expected": "≤50MB(主图)",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "01_qc_violin_mito.pdf    01_qc_violin_mito.pdf 字体类型合规",
+   "observed": "['/Type0']",
+   "expected": "TrueType/Type0",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "01_qc_violin_mito.pdf    命名匹配 02_deg_volcano.pdf",
+   "observed": "01_qc_violin_mito.pdf",
+   "expected": "02_deg_volcano.pdf",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "01_qc_violin_mito.pdf    analysis_step 属于框架阶段标签",
+   "observed": "qc",
+   "expected": "∈ ['batch', 'causal', 'dca', 'deg', 'embedding', 'enrichment', 'ethics', 'governance', 'imputation', 'integration', 'meta', 'modeling', 'multiomics', 'performance', 'perturbation', 'prediction', 'qc', 'rare_event', 'replication', 'reporting', 'sensitivity', 'spatial', 'survival', 'validation', 'writing']",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "01_qc_violin_mito.png    01_qc_violin_mito.png 体积合规",
+   "observed": "47KB",
+   "expected": "≤50MB(主图)",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "01_qc_violin_mito.png    01_qc_violin_mito.png dpi",
+   "observed": "300.0",
+   "expected": ">=300",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "01_qc_violin_mito.png    01_qc_violin_mito.png 色彩模式 RGB",
+   "observed": "RGBA",
+   "expected": "RGB",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "01_qc_violin_mito.png    01_qc_violin_mito.png 宽度 <=183mm(双栏)",
+   "observed": "88.1",
+   "expected": "<=183",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "01_qc_violin_mito.png    命名匹配 02_deg_volcano.pdf",
+   "observed": "01_qc_violin_mito.png",
+   "expected": "02_deg_volcano.pdf",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "01_qc_violin_mito.png    analysis_step 属于框架阶段标签",
+   "observed": "qc",
+   "expected": "∈ ['batch', 'causal', 'dca', 'deg', 'embedding', 'enrichment', 'ethics', 'governance', 'imputation', 'integration', 'meta', 'modeling', 'multiomics', 'performance', 'perturbation', 'prediction', 'qc', 'rare_event', 'replication', 'reporting', 'sensitivity', 'spatial', 'survival', 'validation', 'writing']",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "01_qc_violin_mito.tiff   01_qc_violin_mito.tiff 体积合规",
+   "observed": "249KB",
+   "expected": "≤50MB(主图)",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "01_qc_violin_mito.tiff   01_qc_violin_mito.tiff dpi",
+   "observed": "600",
+   "expected": ">=300",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "01_qc_violin_mito.tiff   01_qc_violin_mito.tiff 色彩模式 RGB",
+   "observed": "RGBA",
+   "expected": "RGB",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "01_qc_violin_mito.tiff   01_qc_violin_mito.tiff 宽度 <=183mm(双栏)",
+   "observed": "88.1",
+   "expected": "<=183",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "01_qc_violin_mito.tiff   命名匹配 02_deg_volcano.pdf",
+   "observed": "01_qc_violin_mito.tiff",
+   "expected": "02_deg_volcano.pdf",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "01_qc_violin_mito.tiff   analysis_step 属于框架阶段标签",
+   "observed": "qc",
+   "expected": "∈ ['batch', 'causal', 'dca', 'deg', 'embedding', 'enrichment', 'ethics', 'governance', 'imputation', 'integration', 'meta', 'modeling', 'multiomics', 'performance', 'perturbation', 'prediction', 'qc', 'rare_event', 'replication', 'reporting', 'sensitivity', 'spatial', 'survival', 'validation', 'writing']",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "02_deg_volcano.jpg       02_deg_volcano.jpg 体积合规",
+   "observed": "53KB",
+   "expected": "≤50MB(主图)",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "02_deg_volcano.jpg       02_deg_volcano.jpg dpi",
+   "observed": "300",
+   "expected": ">=300",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "02_deg_volcano.jpg       02_deg_volcano.jpg 色彩模式 RGB",
+   "observed": "RGB",
+   "expected": "RGB",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "02_deg_volcano.jpg       02_deg_volcano.jpg 宽度 <=183mm(双栏)",
+   "observed": "86.2",
+   "expected": "<=183",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "02_deg_volcano.jpg       命名匹配 02_deg_volcano.pdf",
+   "observed": "02_deg_volcano.jpg",
+   "expected": "02_deg_volcano.pdf",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "02_deg_volcano.jpg       analysis_step 属于框架阶段标签",
+   "observed": "deg",
+   "expected": "∈ ['batch', 'causal', 'dca', 'deg', 'embedding', 'enrichment', 'ethics', 'governance', 'imputation', 'integration', 'meta', 'modeling', 'multiomics', 'performance', 'perturbation', 'prediction', 'qc', 'rare_event', 'replication', 'reporting', 'sensitivity', 'spatial', 'survival', 'validation', 'writing']",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "02_deg_volcano.pdf       02_deg_volcano.pdf 体积合规",
+   "observed": "8KB",
+   "expected": "≤50MB(主图)",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "02_deg_volcano.pdf       02_deg_volcano.pdf 字体类型合规",
+   "observed": "['/Type0']",
+   "expected": "TrueType/Type0",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "02_deg_volcano.pdf       命名匹配 02_deg_volcano.pdf",
+   "observed": "02_deg_volcano.pdf",
+   "expected": "02_deg_volcano.pdf",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "02_deg_volcano.pdf       analysis_step 属于框架阶段标签",
+   "observed": "deg",
+   "expected": "∈ ['batch', 'causal', 'dca', 'deg', 'embedding', 'enrichment', 'ethics', 'governance', 'imputation', 'integration', 'meta', 'modeling', 'multiomics', 'performance', 'perturbation', 'prediction', 'qc', 'rare_event', 'replication', 'reporting', 'sensitivity', 'spatial', 'survival', 'validation', 'writing']",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "02_deg_volcano.png       02_deg_volcano.png 体积合规",
+   "observed": "27KB",
+   "expected": "≤50MB(主图)",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "02_deg_volcano.png       02_deg_volcano.png dpi",
+   "observed": "300.0",
+   "expected": ">=300",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "02_deg_volcano.png       02_deg_volcano.png 色彩模式 RGB",
+   "observed": "RGBA",
+   "expected": "RGB",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "02_deg_volcano.png       02_deg_volcano.png 宽度 <=183mm(双栏)",
+   "observed": "86.2",
+   "expected": "<=183",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "02_deg_volcano.png       命名匹配 02_deg_volcano.pdf",
+   "observed": "02_deg_volcano.png",
+   "expected": "02_deg_volcano.pdf",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "02_deg_volcano.png       analysis_step 属于框架阶段标签",
+   "observed": "deg",
+   "expected": "∈ ['batch', 'causal', 'dca', 'deg', 'embedding', 'enrichment', 'ethics', 'governance', 'imputation', 'integration', 'meta', 'modeling', 'multiomics', 'performance', 'perturbation', 'prediction', 'qc', 'rare_event', 'replication', 'reporting', 'sensitivity', 'spatial', 'survival', 'validation', 'writing']",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "02_deg_volcano.tiff      02_deg_volcano.tiff 体积合规",
+   "observed": "258KB",
+   "expected": "≤50MB(主图)",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "02_deg_volcano.tiff      02_deg_volcano.tiff dpi",
+   "observed": "600",
+   "expected": ">=300",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "02_deg_volcano.tiff      02_deg_volcano.tiff 色彩模式 RGB",
+   "observed": "RGBA",
+   "expected": "RGB",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "02_deg_volcano.tiff      02_deg_volcano.tiff 宽度 <=183mm(双栏)",
+   "observed": "86.2",
+   "expected": "<=183",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "02_deg_volcano.tiff      命名匹配 02_deg_volcano.pdf",
+   "observed": "02_deg_volcano.tiff",
+   "expected": "02_deg_volcano.pdf",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "02_deg_volcano.tiff      analysis_step 属于框架阶段标签",
+   "observed": "deg",
+   "expected": "∈ ['batch', 'causal', 'dca', 'deg', 'embedding', 'enrichment', 'ethics', 'governance', 'imputation', 'integration', 'meta', 'modeling', 'multiomics', 'performance', 'perturbation', 'prediction', 'qc', 'rare_event', 'replication', 'reporting', 'sensitivity', 'spatial', 'survival', 'validation', 'writing']",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "规范自证 颜色取自 Wong2011 色板",
+   "observed": "6/6",
+   "expected": "6/6",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "规范自证 红绿色盲模拟后最小 ΔE ≥ 10.0(强制)",
+   "observed": "14.53",
+   "expected": "≥10.0",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "规范自证 protanopia 可区分(强制)",
+   "observed": "14.53",
+   "expected": "≥10.0",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "规范自证 deuteranopia 可区分(强制)",
+   "observed": "15.99",
+   "expected": "≥10.0",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "规范自证 tritanopia 可区分(建议)",
+   "observed": "8.65",
+   "expected": "≥8.0",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-6",
+   "item": "规范自证 无等亮度红绿对(色板外,建议级)",
+   "observed": "无",
+   "expected": "无",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-5.1",
+   "item": "正文字数 <= 3500",
+   "observed": "47",
+   "expected": "<=3500",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-5.2",
+   "item": "图数量 <= 8",
+   "observed": "3",
+   "expected": "<=8",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-5.3",
+   "item": "表数量 <= 4",
+   "observed": "1",
+   "expected": "<=4",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "C-5.4",
+   "item": "参考文献 <= 60",
+   "observed": "42",
+   "expected": "<=60",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "V5DECL",
+   "item": "声明项已覆盖 8/8",
+   "observed": "8",
+   "expected": "=8",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "check": "V5DECL",
+   "item": "缺声明的稿件可被检出(反向验证)",
+   "observed": "缺 8 项",
+   "expected": ">0 项被抓",
+   "passed": true,
+   "detail": ""
+  }
+ ],
+ "n_pass": 70,
+ "n_fail": 0,
+ "n_total": 70,
+ "demo_violation_caught": true,
+ "demo_violation_detail": {
+  "lost_hedges": [
+   "候选",
+   "探索性",
+   "探索",
+   "尚需",
+   "提示",
+   "可能",
+   "初步"
+  ],
+  "gained_upgrades": [
+   "外部验证"
+  ],
+  "density_before": 82.47,
+  "density_after": 13.7
+ },
+ "note": "MVP 合成值·非项目实际值"
+}

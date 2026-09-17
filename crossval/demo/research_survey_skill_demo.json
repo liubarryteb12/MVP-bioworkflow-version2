@@ -1,0 +1,98 @@
+{
+  "_note": "★ v2.25 新增：demo 用 research_survey_skill 输出夹具（合成，非真实检索结果）。",
+  "_why": [
+    "起因：WP-3.1 原实现把「未提供 skill 输出」判为 N/A，而 N/A 不算失败 →",
+    "  一个从不调用检索 skill 的执行方会永久拿到 N/A（默认放行）。",
+    "  这与框架自己批判的「不提供输入 → 检查自动通过」同构。",
+    "v2.25 已把 WP-3.1 硬化为：未提供 → FAIL。因此构建流程必须**真的提供**",
+    "  一份 skill 输出，否则 WP-3.1 永红。本文件即该夹具。",
+    "边界：本文件只服务 demo/manuscript_fixed.md（合成样例稿），",
+    "  与 demo/manuscript_demo.md（变异锚点）同属 MVP 合成值，",
+    "  不得作为任何真实项目的检索证据。",
+    "自证：guard_selftest 有一则「去掉 --skill 应触发 WP-3.1 FAIL」的变异用例，",
+    "  保证本判据不是空规（先红后绿）。"
+  ],
+  "topic_keywords": [
+    "lung adenocarcinoma",
+    "transcriptomic risk score",
+    "recurrence prognosis",
+    "GSE31210"
+  ],
+  "field": "cancer genomics / prognostic biomarker",
+  "year_range": [1958, 2018],
+  "max_results": 8,
+  "n_found": 8,
+  "papers": [
+    {
+      "id": "1",
+      "doi": "10.1038/nm.1790",
+      "title": "Gene expression-based survival prediction in lung adenocarcinoma: a multi-site, blinded validation study",
+      "authors": "Shedden K, Taylor JM, Enkemann SA, et al.",
+      "journal": "Nature Medicine",
+      "year": 2008
+    },
+    {
+      "id": "2",
+      "doi": "10.1038/nm733",
+      "title": "Gene-expression profiles predict survival of patients with lung adenocarcinoma",
+      "authors": "Beer DG, Kardia SL, Huang CC, et al.",
+      "journal": "Nature Medicine",
+      "year": 2002
+    },
+    {
+      "id": "3",
+      "doi": "10.1111/j.2517-6161.1995.tb02031.x",
+      "title": "Controlling the false discovery rate: a practical and powerful approach to multiple testing",
+      "authors": "Benjamini Y, Hochberg Y.",
+      "journal": "Journal of the Royal Statistical Society B",
+      "year": 1995
+    },
+    {
+      "id": "4",
+      "doi": "10.1111/j.2517-6161.1972.tb00899.x",
+      "title": "Regression models and life-tables",
+      "authors": "Cox DR.",
+      "journal": "Journal of the Royal Statistical Society B",
+      "year": 1972
+    },
+    {
+      "id": "5",
+      "doi": "10.1080/01621459.1958.10501452",
+      "title": "Nonparametric estimation from incomplete observations",
+      "authors": "Kaplan EL, Meier P.",
+      "journal": "Journal of the American Statistical Association",
+      "year": 1958
+    },
+    {
+      "id": "6",
+      "doi": "10.1136/bmj.g7594",
+      "title": "Transparent reporting of a multivariable prediction model for individual prognosis or diagnosis (TRIPOD)",
+      "authors": "Collins GS, Reitsma JB, Altman DG, Moons KG.",
+      "journal": "BMJ",
+      "year": 2015
+    },
+    {
+      "id": "7",
+      "doi": "10.1177/0272989X06295361",
+      "title": "Decision curve analysis: a novel method for evaluating prediction models",
+      "authors": "Vickers AJ, Elkin EB.",
+      "journal": "Medical Decision Making",
+      "year": 2006
+    },
+    {
+      "id": "8",
+      "doi": "10.1038/nature25158",
+      "title": "The biology and management of non-small cell lung cancer",
+      "authors": "Herbst RS, Morgenstern D, Boshoff C.",
+      "journal": "Nature",
+      "year": 2018
+    }
+  ],
+  "coverage_report": {
+    "queries_run": 4,
+    "sources": ["PubMed", "Crossref"],
+    "retrieved": 8,
+    "deduplicated": 8,
+    "note": "合成夹具：条目与 manuscript_fixed.md 的参考文献表一一对应。"
+  }
+}

@@ -1,0 +1,440 @@
+{
+  "n_pass": 66,
+  "total": 66,
+  "env_error": [],
+  "env_error_count": 0,
+  "families": [
+    "G-1",
+    "G-10",
+    "G-11",
+    "G-12",
+    "G-13",
+    "G-14",
+    "G-2",
+    "G-3",
+    "G-4",
+    "G-5",
+    "G-6",
+    "G-7",
+    "G-8",
+    "R-1",
+    "R-2",
+    "R-3",
+    "R-4",
+    "R-5",
+    "R-6",
+    "R-7",
+    "R-8"
+  ],
+  "covered": [
+    "G-1",
+    "G-10",
+    "G-11",
+    "G-12",
+    "G-13",
+    "G-14",
+    "G-2",
+    "G-3",
+    "G-4",
+    "G-5",
+    "G-6",
+    "G-7",
+    "G-8",
+    "R-1",
+    "R-2",
+    "R-3",
+    "R-4",
+    "R-5",
+    "R-6",
+    "R-7",
+    "R-8",
+    "T03",
+    "T09",
+    "T12",
+    "T18",
+    "T26",
+    "T27",
+    "T28",
+    "T29",
+    "T30",
+    "T33",
+    "T34",
+    "T35",
+    "T36",
+    "V4MODAL",
+    "WP-1",
+    "WP-2",
+    "WP-3",
+    "WP-4",
+    "WP-5a",
+    "WP-5b",
+    "WP-5c",
+    "WP-5d",
+    "WP-6",
+    "WP-7c",
+    "WP-8",
+    "WP-9"
+  ],
+  "coverage": "100%",
+  "coverage_family": 21,
+  "coverage_declared_extra": [
+    "T03",
+    "T09",
+    "T12",
+    "T18",
+    "T26",
+    "T27",
+    "T28",
+    "T29",
+    "T30",
+    "T33",
+    "T34",
+    "T35",
+    "T36",
+    "V4MODAL",
+    "WP-1",
+    "WP-2",
+    "WP-3",
+    "WP-4",
+    "WP-5a",
+    "WP-5b",
+    "WP-5c",
+    "WP-5d",
+    "WP-6",
+    "WP-7c",
+    "WP-8",
+    "WP-9"
+  ],
+  "cases": [
+    {
+      "name": "注入违规后应触发 WP-1.1",
+      "expect_id": "WP-1.1 标题升级词",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 WP-2.1",
+      "expect_id": "WP-2.1 摘要首句非P1",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 WP-3.4",
+      "expect_id": "WP-3.4 缺gap",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 WP-4.3a",
+      "expect_id": "WP-4.3a 缺双侧",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 WP-5a.1",
+      "expect_id": "WP-5a.1 显著缺台账",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 WP-5b.1",
+      "expect_id": "WP-5b.1 图号跳号",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 WP-5c.n",
+      "expect_id": "WP-5c 图注缺n",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 WP-5d.1",
+      "expect_id": "WP-5d.1 图题无信息词",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 WP-6.1",
+      "expect_id": "WP-6.1 讨论首段非P1",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 WP-7c.1a",
+      "expect_id": "WP-7c.1a 用而未引",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 WP-8.1",
+      "expect_id": "WP-8.1 模板句式",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 G-1.1",
+      "expect_id": "G-1 内嵌脚本",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 G-3",
+      "expect_id": "G-3 关键数字",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 R-6",
+      "expect_id": "R-6 判据条数",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 G-11.3",
+      "expect_id": "G-11.3",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 G-12.合集.rid-all",
+      "expect_id": "G-12.state",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 G-5.DEPR.≥10",
+      "expect_id": "G-5.DEPR",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 G-5.pypdf.XFA",
+      "expect_id": "G-5.pypdf",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 G-2.2",
+      "expect_id": "G-2.2 过期N/N",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 R-1",
+      "expect_id": "R-1 主验证",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 R-8",
+      "expect_id": "R-8 守卫计数",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 G-8.2",
+      "expect_id": "G-8 表格列数",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 G-11.1",
+      "expect_id": "G-11 附录条数",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 G-12.框架.ver",
+      "expect_id": "G-12 banner版本",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 G-12.框架.rid",
+      "expect_id": "G-12 banner run_id",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 G-10.1",
+      "expect_id": "G-10.1 版本化一致",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 G-4.2",
+      "expect_id": "G-4 排版声称",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 G-6.缩进",
+      "expect_id": "G-6 变更清单",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 R-2",
+      "expect_id": "R-2 排版N/N",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 R-3",
+      "expect_id": "R-3 run_id",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 R-4",
+      "expect_id": "R-4 孤立数字",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 R-5",
+      "expect_id": "R-5 handoff节点",
+      "caught": true
+    },
+    {
+      "name": "注入违规后应触发 R-7",
+      "expect_id": "R-7 附录脚本",
+      "caught": true
+    },
+    {
+      "name": "应全 PASS",
+      "expect_id": "WP-9 三格式(合规)",
+      "caught": true
+    },
+    {
+      "name": "应报 FAIL",
+      "expect_id": "WP-9 三格式(占位符不一致)",
+      "caught": true
+    },
+    {
+      "name": "注入违规图名后应触发 G-7.2",
+      "expect_id": "G-7 图命名(fs变异)",
+      "caught": true
+    },
+    {
+      "name": "变异临时图文件已清理",
+      "expect_id": "G-7 残留检测",
+      "caught": true
+    },
+    {
+      "name": "放置过期副本后应触发 G-14.1",
+      "expect_id": "G-14 过期副本",
+      "caught": true
+    },
+    {
+      "name": "变异临时副本已清理",
+      "expect_id": "G-14 残留检测",
+      "caught": true
+    },
+    {
+      "name": "源码注入硬编码后应触发 G-13.*",
+      "expect_id": "G-13 硬编码主文档",
+      "caught": true
+    },
+    {
+      "name": "守卫源码已还原",
+      "expect_id": "G-13 源码恢复",
+      "caught": true
+    },
+    {
+      "name": "T26 应抓到:随机噪声冒充真实嵌入 → 应判 fail",
+      "expect_id": "T26 变异",
+      "caught": true
+    },
+    {
+      "name": "T26 应抓到:弱信噪比嵌入 → 应降级(判 fail)",
+      "expect_id": "T26 变异",
+      "caught": true
+    },
+    {
+      "name": "T27 应抓到:零样本迁移却在目标上调参 → 应判 fail",
+      "expect_id": "T27 变异",
+      "caught": true
+    },
+    {
+      "name": "T27 应抓到:从头训练却声称跨数据集复现 → 应判 fail",
+      "expect_id": "T27 变异",
+      "caught": true
+    },
+    {
+      "name": "T27 应抓到:微调但 n_calib=8(<20) → 应判 fail",
+      "expect_id": "T27 变异",
+      "caught": true
+    },
+    {
+      "name": "T28 应抓到:假阴性对照(同模块) → 应判 fail",
+      "expect_id": "T28 变异",
+      "caught": true
+    },
+    {
+      "name": "T28 应抓到:虚拟KO写'功能验证' → 应判 fail",
+      "expect_id": "T28 变异",
+      "caught": true
+    },
+    {
+      "name": "T29 应抓到:声称代表充分却无子群样本量 → 应判 fail",
+      "expect_id": "T29 变异",
+      "caught": true
+    },
+    {
+      "name": "T30 应抓到:声称匿名化却无方法 + GDPR 无法条 → 应判 fail",
+      "expect_id": "T30 变异",
+      "caught": true
+    },
+    {
+      "name": "T03 应抓到:声明全基因组却只校正 500 个 → 应判 fail",
+      "expect_id": "T03 变异",
+      "caught": true
+    },
+    {
+      "name": "T09 应抓到:用样本内概率做校准 → 应判 fail",
+      "expect_id": "T09 变异",
+      "caught": true
+    },
+    {
+      "name": "T12 应抓到:样本内 1.000/样本外 0.544 → 应判 warn",
+      "expect_id": "T12 变异",
+      "caught": true
+    },
+    {
+      "name": "T18 应抓到:预注册 4 个仅报 2 个 → 应判 fail",
+      "expect_id": "T18 变异",
+      "caught": true
+    },
+    {
+      "name": "T36 应抓到:只报全组件性能无消融 → 应判 fail",
+      "expect_id": "T36 变异",
+      "caught": true
+    },
+    {
+      "name": "T36 应抓到:全部组件无增量却声称整合有用 → 应判 fail",
+      "expect_id": "T36 变异",
+      "caught": true
+    },
+    {
+      "name": "T33 应抓到:5/10000 稀有比例声称变化(CI 跨 5.48 倍)→ 应判 fail",
+      "expect_id": "T33 变异",
+      "caught": true
+    },
+    {
+      "name": "T33 应抓到:2年数据估20年一遇(1/n 无法解析)→ 应判 fail",
+      "expect_id": "T33 变异",
+      "caught": true
+    },
+    {
+      "name": "T34 应抓到:只报平均性能却声称精确预测 → 应判 fail",
+      "expect_id": "T34 变异",
+      "caught": true
+    },
+    {
+      "name": "T34 应抓到:不确定性无信息却声称个体风险 → 应判 fail",
+      "expect_id": "T34 变异",
+      "caught": true
+    },
+    {
+      "name": "T34 应抓到:corr 高却未分层报告 → 应判 fail",
+      "expect_id": "T34 变异",
+      "caught": true
+    },
+    {
+      "name": "T35 应抓到:MTAG 循环论证 → 应判 fail",
+      "expect_id": "T35 变异",
+      "caught": true
+    },
+    {
+      "name": "T35 应抓到:LDSC intercept=1.2 未校正 → 应判 fail",
+      "expect_id": "T35 变异",
+      "caught": true
+    },
+    {
+      "name": "V4MODAL 应抓到:in silico+in vitro 声称治疗有效 → 应判 fail",
+      "expect_id": "V4MODAL 变异",
+      "caught": true
+    },
+    {
+      "name": "V4MODAL 应抓到:仅 in silico 声称临床效用 → 应判 fail",
+      "expect_id": "V4MODAL 变异",
+      "caught": true
+    },
+    {
+      "name": "MUST_COVER 声明的守卫均有变异用例",
+      "expect_id": "G-COV",
+      "caught": true
+    }
+  ]
+}

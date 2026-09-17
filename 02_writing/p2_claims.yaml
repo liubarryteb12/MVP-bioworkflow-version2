@@ -1,7 +1,0 @@
-timestamp: 2026-09-16T12:17:35+0800
-output_level: L1
-evidence_boundary: 探索性
-claims: []
-blocked_claims:
-- reason: T21 fail
-  note: 差异表达/富集主张全部禁止

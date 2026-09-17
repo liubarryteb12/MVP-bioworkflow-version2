@@ -1,0 +1,318 @@
+# 云端照镜子 · 框架交叉验证 T1–T11（GitHub Actions · 仓库根=交付包布局适配版）
+# 依据：云端服务器执行提示词_v1.0（v2.26 口径）。
+# 适配说明：v2.26 完整包内容已平铺在仓库根（不再上传 zip），
+#           因此 T2 的"解压"改为"完整性核对"；其余 T1–T11 命令与官方提示词逐条一致。
+# 纪律：不修改任何框架代码；FAIL 是结果不是故障，不重试、不为了让数字变绿做任何事。
+
+name: crossval-verify-T1-T11
+
+on:
+  workflow_dispatch:
+
+jobs:
+  framework-verify:
+    name: 框架自证（T1–T11）
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"   # 对齐基线环境：requirements 钉 numpy==2.5.0（Requires-Python >=3.12），基线实测 Python 3.14
+
+      - name: T1–T11 官方流程
+        env:
+          PYTHONUTF8: "1"
+          PYTHONIOENCODING: utf-8
+        run: |
+          set +e
+          export CVROOT=$HOME/cvrun
+          mkdir -p $CVROOT/pkg $CVROOT/out/copy
+          progress() { echo "$1 | $(date '+%F %T')" >> $CVROOT/out/PROGRESS.md; }
+
+          echo "===== T1 环境准备 ====="
+          python3 --version
+          which unzip || { sudo apt-get update -qq && sudo apt-get install -y -qq unzip; }
+          # 仓库根 = 交付包布局：同步到 ~/cvrun/pkg（排除 git/CI/归档/数据文件）
+          rsync -a --exclude '.git' --exclude '.github' \
+                --exclude '_archive_v2.24_partial' \
+                --exclude 'GSE31210_series_matrix.txt.gz' \
+                --exclude 'README.md' \
+                "$GITHUB_WORKSPACE/" $CVROOT/pkg/
+          progress "T1 环境准备 ✅ python=$(python3 --version)"
+
+          echo "===== T2 包完整性核对（CP-2 五项，缺任一 G2 STOP）====="
+          cd $CVROOT/pkg
+          MISS=0
+          for f in MANIFEST.json ZIP_CONTENTS.md crossval/scripts/verify_all.py \
+                   框架_独立审核包_v*.md 四角度审核报告_合集_v*.md; do
+            hit=$(ls $f 2>/dev/null | head -1)
+            [ -n "$hit" ] && echo "OK   $f" || { echo "MISS $f"; MISS=1; }
+          done
+          echo "--- 交付文件总数（参考，含排除项差异）---"; find . -type f | wc -l
+          if [ $MISS -eq 1 ]; then echo "G2 STOP：CP-2 必需文件缺失"; exit 2; fi
+          progress "T2 CP-2 五项齐 ✅"
+
+          echo "===== T3 依赖安装（requirements.txt 为唯一来源）====="
+          cd $CVROOT/pkg/crossval
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install --upgrade pip -q
+          pip install -r requirements.txt
+          PIRC=$?
+          if [ $PIRC -ne 0 ]; then
+            echo "pip 首次失败，按 §7 换镜像重试 1 次"
+            pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+            PIRC=$?
+          fi
+          echo "PIP_EXIT=$PIRC"
+          [ $PIRC -eq 0 ] && progress "T3 依赖安装 ✅" || progress "T3 依赖安装 ❌（G3 网关注意）"
+
+          echo "===== T4 主验证 ====="
+          python3 scripts/verify_all.py 2>&1 | tee $CVROOT/out/01_verify_stdout.txt
+          echo "EXIT=${PIPESTATUS[0]}"
+          cp results/report.json $CVROOT/out/copy/ 2>/dev/null
+          cp results/report.md   $CVROOT/out/copy/ 2>/dev/null
+          progress "T4 主验证（数字见 01_verify_stdout.txt 末行）"
+
+          echo "===== T5 排版检查 ====="
+          python3 scripts/layout_check.py --figdir figures/demo 2>&1 | tee $CVROOT/out/02_layout_stdout.txt
+          echo "EXIT=${PIPESTATUS[0]}"
+          cp results/layout_report.json $CVROOT/out/copy/ 2>/dev/null
+          progress "T5 排版检查"
+
+          echo "===== T6 判据消融（不可跳过，只出 stdout 必须 tee）====="
+          python3 scripts/ablation.py 2>&1 | tee $CVROOT/out/03_ablation_stdout.json
+          echo "EXIT=${PIPESTATUS[0]}"
+          progress "T6 判据消融"
+
+          echo "===== T7 变异测试（守卫有效性；退出码三态 0/1/2）====="
+          python3 scripts/guard_selftest.py 2>&1 | tee $CVROOT/out/04_mutation_stdout.txt
+          echo "EXIT=${PIPESTATUS[0]}   # 0=全绿 1=空规(高价值发现) 2=环境错误(本轮无效)"
+          cp results/mutation_results.json $CVROOT/out/copy/ 2>/dev/null
+          progress "T7 变异测试"
+
+          echo "===== T8 三道守卫 + 环境快照 ====="
+          DOC_FRAME=$(ls $CVROOT/pkg/框架_独立审核包_v*.md | head -1)
+          DOC_REPORT=$(ls $CVROOT/pkg/四角度审核报告_合集_v*.md | head -1)
+          python3 scripts/consistency_guard.py --doc "$DOC_FRAME" 2>&1 | tee $CVROOT/out/05_consistency_stdout.txt
+          echo "EXIT=${PIPESTATUS[0]}"
+          python3 scripts/report_guard.py      --doc "$DOC_REPORT" 2>&1 | tee $CVROOT/out/06_report_guard_stdout.txt
+          echo "EXIT=${PIPESTATUS[0]}"
+          python3 scripts/platform_check.py    2>&1 | tail -5 | tee $CVROOT/out/07_platform_snapshot_tail.txt
+          cp results/platform_snapshot.json $CVROOT/out/copy/ 2>/dev/null
+          python3 ../handoff/scripts/handoff_guard.py 2>&1 | tee $CVROOT/out/09_handoff_stdout.txt
+          echo "EXIT=${PIPESTATUS[0]}"
+          cp results/guard_results.json $CVROOT/out/copy/ 2>/dev/null
+          progress "T8 三道守卫+环境快照"
+
+          echo "===== T9 单元测试 ====="
+          python3 -m pytest tests/ -q 2>&1 | tee $CVROOT/out/08_pytest_stdout.txt
+          echo "EXIT=${PIPESTATUS[0]}"
+          cp results/pytest_results.json $CVROOT/out/copy/ 2>/dev/null
+          progress "T9 单元测试"
+
+          echo "===== T10 写作流程守卫（--p1 与 --skill 必须提供）====="
+          P1=$(awk '/^## 摘要/{f=1;next} f && NF {print; exit}' demo/manuscript_fixed.md | sed 's/。.*/。/')
+          echo "提取的真实 P1：$P1"
+          python3 scripts/writing_guard.py --doc demo/manuscript_fixed.md \
+            --p1 "$P1" --skill demo/research_survey_skill_demo.json \
+            2>&1 | tee $CVROOT/out/10_writing_stdout.txt
+          echo "EXIT=${PIPESTATUS[0]}"
+          cp results/writing_report.json $CVROOT/out/copy/ 2>/dev/null
+          # 先红后绿自证：去掉 --skill 重跑，应出现 [FAIL] WP-3.1
+          python3 scripts/writing_guard.py --doc demo/manuscript_fixed.md --p1 "$P1" \
+            2>&1 | tee $CVROOT/out/10b_writing_no_skill_stdout.txt
+          echo "EXIT=${PIPESTATUS[0]}   # 预期非 0 且含 [FAIL] WP-3.1，证明该判据非空规"
+          progress "T10 写作守卫"
+
+          echo "===== T11 三格式导出守卫 ====="
+          python3 scripts/export_guard.py \
+            --a demo/export/docA.txt --b demo/export/docB.txt --p demo/export/docP.txt \
+            2>&1 | tee $CVROOT/out/11_export_stdout.txt
+          echo "EXIT=${PIPESTATUS[0]}"
+          progress "T11 导出守卫"
+
+          echo "===== 收尾 ====="
+          cp -r $CVROOT/out "$GITHUB_WORKSPACE/cloud_out"
+          echo "===== 全部完成，产物在 cloud_out/ ====="
+
+      - name: 上传全部原始输出（Artifacts）
+        uses: actions/upload-artifact@v4
+        with:
+          name: crossval-outputs
+          path: cloud_out/
+          retention-days: 30
+
+  gse31210-analysis:
+    name: GSE31210 真实数据分析出图（05 实战云端复跑）
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: 安装分析依赖
+        run: pip install -r analysis/requirements.txt
+
+      - name: 模块契约冒烟测试（模块"可用性"验收，规范依据 10.代码生成规范参考）
+        env:
+          PYTHONUTF8: "1"
+        run: |
+          cd analysis
+          python -m pytest test_module_contracts.py -q -p no:cacheprovider 2>&1 | tee module_contracts_stdout.txt
+          echo "CONTRACT_EXIT=${PIPESTATUS[0]}   # 0=注册表/配置/纯函数/适配器/插件契约全绿"
+
+      - name: 运行全链分析（QC→DEG→富集→折内建模→Cox/KM→台账→图件）
+        env:
+          GSE_DATA_PATH: ${{ github.workspace }}/GSE31210_series_matrix.txt.gz
+          PYTHONUTF8: "1"
+        run: |
+          cd analysis
+          python analyze_gse31210.py 2>&1 | tee analysis_stdout.txt
+          echo "EXIT=${PIPESTATUS[0]}"
+          python variant_experiment.py 2>&1 | tee variant_stdout.txt
+          echo "EXIT=${PIPESTATUS[0]}"
+          python make_figures.py 2>&1 | tee figures_stdout.txt
+          echo "EXIT=${PIPESTATUS[0]}"
+          python gen_ledger.py
+          python claim_support_audit.py 2>&1 | tee claim_audit_stdout.txt
+          echo "CLAIM_AUDIT_EXIT=${PIPESTATUS[0]}   # 0=结论全部被结果支撑（用户硬要求）"
+          # 排版：CJK 字体必须**先装好再编译**（装在编译之后 → 回落 base-14 → 中文整段丢弃，
+          # run 34796985194 实证）；且须用 **TrueType 轮廓**的字体——Noto CJK 是 CFF/PostScript
+          # 轮廓，ReportLab 报 "postscript outlines are not supported"（run 34815434564 实证）。
+          # SCI 版式（2026-09-14）：西文衬线 Liberation Serif（Times 度量兼容）+ 中文宋体类
+          # AR PL UMing（明体，TrueType），文泉驿正黑/Droid 作兜底（均可真嵌入）。
+          sudo apt-get update -qq && sudo apt-get install -y -qq \
+            fonts-liberation fonts-arphic-uming fonts-wqy-zenhei fonts-droid-fallback
+          python export_manuscript.py 2>&1 | tee export_stdout.txt
+          echo "EXIT=${PIPESTATUS[0]}"
+          # PDF 由 SCI 预印本排版引擎（typeset_engine，内化自 09.SCI文章排版参考）生成；
+          # 门禁：字体须全为嵌入型 + 中文正文须保留（任一不达即 job 失败，防"残缺 PDF"）
+          python -c "import re,sys,pypdf; r=pypdf.PdfReader('export/manuscript_gse31210.pdf'); t=''.join(p.extract_text() or '' for p in r.pages); cjk=len(re.findall(r'[\u4e00-\u9fff]',t)); subs={(str(f.get_object().get('/Subtype')),str(f.get_object().get('/BaseFont'))) for pg in r.pages for f in (pg['/Resources'].get('/Font') or {}).values()}; bad=[s for s in subs if s[0] not in ('/TrueType','/Type0','/CIDFontType2','/CIDFontType0')]; print('PDF 页数:',len(r.pages),'| 中文字符:',cjk,'| 字体:',sorted(subs)); print('PDF 门禁:', 'PASS' if (cjk>200 and not bad) else 'FAIL', '| 未嵌入:',bad); sys.exit(0 if (cjk>200 and not bad) else 1)"
+          echo "PDF_GATE_EXIT=${PIPESTATUS[0]}   # 0=字体全嵌入且中文正文完整"
+          python ../crossval/scripts/export_guard.py \
+            --a export/docA.txt --b export/docB.txt --p export/docP.txt \
+            --out export/export_report.json 2>&1 | tee export_guard_stdout.txt
+          echo "EXPORT_GUARD_EXIT=${PIPESTATUS[0]}   # 0=三格式一致（WP-9 全过）"
+          # ===== SCI 写作工作流云端验证：内容（writing_guard 43 项）=====
+          P1=$(awk '/^## 摘要/{f=1;next} f && NF {print; exit}' manuscript_gse31210.md | sed 's/。.*/。/')
+          echo "真实 P1：$P1"
+          python ../crossval/scripts/writing_guard.py \
+            --doc manuscript_gse31210.md --p1 "$P1" \
+            --skill research_survey_skill_output.json 2>&1 | tee writing_guard_stdout.txt
+          echo "WRITING_GUARD_EXIT=${PIPESTATUS[0]}   # 基线 43/43"
+          # ===== 排版/出图云端验证（layout_check：C-6 图内容 + G-7 命名 + 排版层）=====
+          python ../crossval/scripts/layout_check.py --figdir ../figures 2>&1 | tee layout_check_stdout.txt
+          echo "LAYOUT_CHECK_EXIT=${PIPESTATUS[0]}   # 基线 72/72"
+          # ===== 生信分析模块库：点菜式流水线演示（菜单→编号归档）=====
+          python bio_pipeline.py --config pipeline_config_gse31210_demo.json 2>&1 | tee pipeline_demo_log.txt
+          echo "PIPELINE_EXIT=${PIPESTATUS[0]}"
+          python bio_pipeline.py --config pipeline_config_modules_ext.json 2>&1 | tee pipeline_ext_log.txt
+          echo "PIPELINE_EXT_EXIT=${PIPESTATUS[0]}"
+          # 插件机制验证：新增模块以 modules/ 文件形式增量接入（不需改执行器）
+          python bio_pipeline.py --config pipeline_config_plugin_demo.json 2>&1 | tee pipeline_plugin_log.txt
+          echo "PIPELINE_PLUGIN_EXIT=${PIPESTATUS[0]}"
+          # v2 参考文件方法补齐：M18 相关性 / M20 LASSO 稀疏模型 / M19 列线图
+          python bio_pipeline.py --config pipeline_config_v2_methods.json 2>&1 | tee pipeline_v2_log.txt
+          echo "PIPELINE_V2_EXIT=${PIPESTATUS[0]}"
+
+      # 大 artifact：全量审计留痕。其中 `analysis/runs/**/expr_log2.csv` 已排除——
+      # 每份 234 MB、跨 run 逐位相同、可由 06 数据 + M03 重算；它曾把本包撑到 ~454 MB，
+      # 而通常只需要其中 ~2 MB 的排版件/图件 → 那两项另出小 artifact（见下）。
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gse31210-figures-results
+          path: |
+            figures/
+            results/
+            analysis/export/
+            analysis/analysis_stdout.txt
+            analysis/variant_stdout.txt
+            analysis/figures_stdout.txt
+            analysis/export_stdout.txt
+            analysis/export_guard_stdout.txt
+            analysis/writing_guard_stdout.txt
+            analysis/layout_check_stdout.txt
+            analysis/claim_audit_stdout.txt
+            analysis/module_contracts_stdout.txt
+            analysis/pipeline_demo_log.txt
+            analysis/pipeline_ext_log.txt
+            analysis/pipeline_plugin_log.txt
+            analysis/pipeline_v2_log.txt
+            analysis/runs/
+            !analysis/runs/**/expr_log2.csv
+          retention-days: 30
+
+      # 小 artifact：只装排版件（~2 MB），刷新交付件时不必再拉整包
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gse31210-export
+          path: |
+            analysis/export/
+            analysis/export_stdout.txt
+            analysis/export_guard_stdout.txt
+          retention-days: 30
+
+      # 小 artifact：只装图件四格式（~2 MB）
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gse31210-figures
+          path: figures/
+          retention-days: 30
+
+  realdata-preflight:
+    name: GSE31210 数据预检（U01 九槽位前置，非分析）
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 仓库内 GSE31210 完整性 + 元数据预检
+        run: |
+          mkdir -p cloud_out && cd cloud_out
+          SRC="$GITHUB_WORKSPACE/GSE31210_series_matrix.txt.gz"
+          ls -la "$SRC"
+          gzip -t "$SRC" && echo "gzip 完整性 OK"
+          sha256sum "$SRC" | tee GSE31210_sha256.txt
+          python3 - "$SRC" <<'EOF' | tee GSE31210_预检.md
+          import gzip, sys
+          path = sys.argv[1]
+          meta = {}
+          samples = None
+          chars = []
+          with gzip.open(path, "rt", errors="replace") as f:
+              for line in f:
+                  line = line.rstrip("\n")
+                  if line.startswith("!Series_title"):
+                      meta["title"] = line.split("\t", 1)[1].strip('"')
+                  elif line.startswith("!Series_platform_id"):
+                      meta["platform"] = line.split("\t", 1)[1].strip('"')
+                  elif line.startswith("!Sample_geo_accession"):
+                      samples = line.split("\t")[1:]
+                  elif line.startswith("!Sample_characteristics_ch1"):
+                      chars.append(line.split("\t")[1:])
+                  elif line.startswith("!series_matrix_table_end"):
+                      break
+          print("# GSE31210 预检（U01 九槽位前置材料，非分析结论）\n")
+          print(f"- Series 标题：{meta.get('title')}")
+          print(f"- 平台：{meta.get('platform')}")
+          print(f"- 样本数：{len(samples) if samples else '未知'}")
+          print(f"- 特征字段行数：{len(chars)}")
+          for i, c in enumerate(chars):
+              vals = sorted(set(c))
+              print(f"  - characteristics[{i}]：{len(vals)} 个取值，示例：{vals[:6]}")
+          print("\n> 说明：本预检只登记九槽位所需的来源/平台/样本/字段信息，")
+          print("> 不做任何 QC 判定或分析——那要等 U00 预注册填槽后在流水线里做。")
+          EOF
+          cd ..
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gse31210-preflight
+          path: cloud_out/
+          retention-days: 30
