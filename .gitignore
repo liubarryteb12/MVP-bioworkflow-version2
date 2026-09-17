@@ -1,7 +1,8 @@
-
 # safety: never push raw data
 *.gz
+# 云端运行必需的公开参考/输入（非私有原始数据）例外
+!GSE31210_series_matrix.txt.gz
+!analysis/assets/GPL570.annot.gz
 inputs/raw/
 __pycache__/
 *.pyc
-
