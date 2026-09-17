@@ -1,0 +1,11 @@
+{
+  "run_name": "plugin_demo",
+  "gse": "GSE31210",
+  "data_path": "GSE31210_series_matrix.txt.gz",
+  "seed": 20260910,
+  "group_prefix": "tissue:",
+  "modules": ["M01", "M03", "M17"],
+  "params": {
+    "M17": {"outlier_median_r": 0.8}
+  }
+}

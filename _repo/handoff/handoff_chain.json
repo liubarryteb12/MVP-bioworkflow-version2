@@ -1,0 +1,366 @@
+{
+ "schema": "handoff/v1.0",
+ "chain_id": "PSCI-FRAMEWORK-2026",
+ "note": "工作证据链。每个节点=一次跨角色交付。ack=null 表示在途未确认。",
+ "nodes": [
+  {
+   "handoff_id": "H01_USER2C_需求启动",
+   "from": "USER",
+   "to": "C",
+   "time": "2026-09-10T00:00:00+08:00",
+   "artifacts": [
+    "口头需求:搭建生信论文分析防错框架"
+   ],
+   "state_in": {
+    "is_root": true
+   },
+   "state_out": "不适用(需求层,无判据状态)",
+   "blocking": [],
+   "actions_required": [
+    "C 下发框架搭建任务卡"
+   ],
+   "checksums": {},
+   "ack": {
+    "by": "C",
+    "time": "2026-09-10T00:05:00+08:00",
+    "note": "确认"
+   },
+   "next": "H02_C2A_S01任务卡"
+  },
+  {
+   "handoff_id": "H02_C2A_S01任务卡",
+   "from": "C",
+   "to": "A",
+   "time": "2026-09-10T00:10:00+08:00",
+   "artifacts": [
+    "S01 任务卡(框架核定与阈值预注册)"
+   ],
+   "state_in": {
+    "predecessors": [
+     "H01_USER2C_需求启动"
+    ]
+   },
+   "state_out": "已执行",
+   "blocking": [],
+   "actions_required": [
+    "A 核定框架、定稿 T01-T18"
+   ],
+   "checksums": {},
+   "ack": {
+    "by": "A",
+    "time": "2026-09-10T00:15:00+08:00",
+    "note": "确认"
+   },
+   "next": "H03_A2C_S03框架核定"
+  },
+  {
+   "handoff_id": "H03_A2C_S03框架核定",
+   "from": "A",
+   "to": "C",
+   "time": "2026-09-10T01:00:00+08:00",
+   "artifacts": [
+    "A2C_S03_通用框架核定与规则定稿_v1.md"
+   ],
+   "state_in": {
+    "predecessors": [
+     "H02_C2A_S01任务卡"
+    ]
+   },
+   "state_out": "条件通过(4 条 condition)",
+   "blocking": [
+    "C1 版本号不自洽",
+    "C2 §9-§10 断层"
+   ],
+   "actions_required": [
+    "C 拍板 v1.4"
+   ],
+   "checksums": {},
+   "ack": null,
+   "next": "H04_C2A_S07复核"
+  },
+  {
+   "handoff_id": "H04_C2A_S07复核",
+   "from": "C",
+   "to": "A",
+   "time": "2026-09-10T02:00:00+08:00",
+   "artifacts": [
+    "v1.4 复核要求"
+   ],
+   "state_in": {
+    "predecessors": [
+     "H03_A2C_S03框架核定"
+    ]
+   },
+   "state_out": "已执行",
+   "blocking": [],
+   "actions_required": [
+    "A 复核 §28、定稿 DCA 区间、填槽检查单、三级验收判据"
+   ],
+   "checksums": {},
+   "ack": {
+    "by": "A",
+    "time": "2026-09-10T02:10:00+08:00",
+    "note": "确认"
+   },
+   "next": "H05_A2C_S07判据定稿"
+  },
+  {
+   "handoff_id": "H05_A2C_S07判据定稿",
+   "from": "A",
+   "to": "C",
+   "time": "2026-09-10T03:00:00+08:00",
+   "artifacts": [
+    "A2C_S07_v1.4复核与判据定稿_v1.md"
+   ],
+   "state_in": {
+    "predecessors": [
+     "H04_C2A_S07复核"
+    ]
+   },
+   "state_out": "条件通过",
+   "blocking": [
+    "G6 未注入"
+   ],
+   "actions_required": [
+    "C 注入 G6 实例化输入"
+   ],
+   "checksums": {},
+   "ack": null,
+   "next": "H06_A2C_S13回执"
+  },
+  {
+   "handoff_id": "H06_A2C_S13回执",
+   "from": "A",
+   "to": "C",
+   "time": "2026-09-10T04:00:00+08:00",
+   "artifacts": [
+    "A2C_S13_回执确认与G6前置准备_v1.md"
+   ],
+   "state_in": {
+    "predecessors": [
+     "H05_A2C_S07判据定稿"
+    ]
+   },
+   "state_out": "v1.5 确认 + 判定分工修订为 14 项",
+   "blocking": [
+    "G6 未注入"
+   ],
+   "actions_required": [
+    "用户提供 G6"
+   ],
+   "checksums": {},
+   "ack": null,
+   "next": "H07_A2C_S15判据闭合"
+  },
+  {
+   "handoff_id": "H07_A2C_S15判据闭合",
+   "from": "A",
+   "to": "C",
+   "time": "2026-09-10T05:00:00+08:00",
+   "artifacts": [
+    "S15-A/B/C/D/E 判据闭合与全量修订"
+   ],
+   "state_in": {
+    "predecessors": [
+     "H06_A2C_S13回执"
+    ]
+   },
+   "state_out": "8/8 分支实跑验证",
+   "blocking": [
+    "P1-P5 待指挥席落盘"
+   ],
+   "actions_required": [
+    "C 落 v1.8"
+   ],
+   "checksums": {},
+   "ack": null,
+   "next": "H08_C不可用_断电"
+  },
+  {
+   "handoff_id": "H08_C不可用_断电",
+   "from": "USER",
+   "to": "A",
+   "time": "2026-09-10T06:00:00+08:00",
+   "artifacts": [
+    "通知:C 宕机"
+   ],
+   "state_in": {
+    "predecessors": [
+     "H07_A2C_S15判据闭合"
+    ]
+   },
+   "state_out": "阻塞(C 不可用)",
+   "blocking": [
+    "C 宕机"
+   ],
+   "actions_required": [
+    "A 决定:不代理 C,冻结推进,固化状态"
+   ],
+   "checksums": {},
+   "ack": {
+    "by": "A",
+    "time": "2026-09-10T06:05:00+08:00",
+    "note": "确认,产出 S16 断电恢复包"
+   },
+   "next": "H09_A2USER_S16恢复包"
+  },
+  {
+   "handoff_id": "H09_A2USER_S16恢复包",
+   "from": "A",
+   "to": "USER",
+   "time": "2026-09-10T06:30:00+08:00",
+   "artifacts": [
+    "S16_断电恢复包_v1.md",
+    "框架_断电归档_20260910.zip"
+   ],
+   "state_in": {
+    "predecessors": [
+     "H08_C不可用_断电"
+    ]
+   },
+   "state_out": "已交付",
+   "blocking": [],
+   "actions_required": [
+    "用户选择恢复路径"
+   ],
+   "checksums": {},
+   "ack": null,
+   "next": "H10_A2USER_交叉验证包"
+  },
+  {
+   "handoff_id": "H10_A2USER_交叉验证包",
+   "from": "A",
+   "to": "USER",
+   "time": "2026-09-10T17:00:00+08:00",
+   "artifacts": [
+    "框架交叉验证包_v1.zip ~ v4.zip"
+   ],
+   "state_in": {
+    "predecessors": [
+     "H09_A2USER_S16恢复包"
+    ]
+   },
+   "state_out": "已交付(用户转交第二 agent 交叉验证)",
+   "blocking": [],
+   "actions_required": [
+    "第二 agent 在 Win11/PS7 环境复跑"
+   ],
+   "checksums": {},
+   "ack": null,
+   "next": "H11_A2USER_审核包"
+  },
+  {
+   "handoff_id": "H11_A2USER_审核包",
+   "from": "A",
+   "to": "USER",
+   "time": "2026-09-10T20:00:00+08:00",
+   "artifacts": [
+    "框架_独立审核包_v1.md"
+   ],
+   "state_in": {
+    "predecessors": [
+     "H10_A2USER_交叉验证包"
+    ],
+    "note": "含排版层 V5-P/V5-C"
+   },
+   "state_out": "已交付(单文件自包含)",
+   "blocking": [],
+   "actions_required": [
+    "外部 AI 四角度审核"
+   ],
+   "checksums": {},
+   "ack": null,
+   "next": "H12_USER2A_首轮审核反馈"
+  },
+  {
+   "handoff_id": "H12_USER2A_首轮审核反馈",
+   "from": "USER",
+   "to": "A",
+   "time": "2026-09-11T00:00:00+08:00",
+   "artifacts": [
+    "四角度审核报告(教授/Harness/代码员/审稿人)"
+   ],
+   "state_in": {
+    "predecessors": [
+     "H11_A2USER_审核包"
+    ]
+   },
+   "state_out": "需修订后使用",
+   "blocking": [
+    "13 项缺口未处理",
+    "脚本与条文不等价",
+    "44/44 与脚本不符"
+   ],
+   "actions_required": [
+    "A 修 P0 六项 + 重写 T13(c)"
+   ],
+   "checksums": {},
+   "ack": {
+    "by": "A",
+    "time": "2026-09-11T00:10:00+08:00",
+    "note": "确认,产出 S20"
+   },
+   "next": "H13_A2USER_S20复审响应"
+  },
+  {
+   "handoff_id": "H13_A2USER_S20复审响应",
+   "from": "A",
+   "to": "USER",
+   "time": "2026-09-11T04:00:00+08:00",
+   "artifacts": [
+    "S20_复审响应与T13c终稿.md",
+    "框架交叉验证包_v4.zip",
+    "consistency_guard.py"
+   ],
+   "state_in": {
+    "predecessors": [
+     "H12_USER2A_首轮审核反馈"
+    ]
+   },
+   "state_out": "P0 闭环(一致性守卫 14/14)",
+   "blocking": [
+    "13 项缺口仍未处理",
+    "无 handoff 证据链"
+   ],
+   "actions_required": [
+    "补 13 项 + 建 handoff 链 + 迭代审核 8 次"
+   ],
+   "checksums": {},
+   "ack": null,
+   "next": "H14_A2USER_S21缺口补齐"
+  },
+  {
+   "handoff_id": "H14_A2USER_S21缺口补齐",
+   "from": "A",
+   "to": "USER",
+   "time": "2026-09-11T05:00:00+08:00",
+   "artifacts": [
+    "S21-A_统计方法学缺口条文.md",
+    "S21-B_组学专属缺口条文.md",
+    "S21-C_报告规范与工程化条文.md",
+    "handoff/00_HANDOFF规范.md",
+    "handoff/scripts/handoff_guard.py"
+   ],
+   "state_in": {
+    "predecessors": [
+     "H13_A2USER_S20复审响应"
+    ]
+   },
+   "state_out": "待审核",
+   "blocking": [],
+   "actions_required": [
+    "四角度迭代审核 8 次"
+   ],
+   "checksums": {
+    "S21-A_统计方法学缺口条文.md": "a119d8398cdc055c",
+    "S21-B_组学专属缺口条文.md": "f6347af98737a224",
+    "S21-C_报告规范与工程化条文.md": "a8e136fcf23cfcf7",
+    "handoff/00_HANDOFF规范.md": "8c951a75a60e8fb4",
+    "handoff/scripts/handoff_guard.py": "256def87a0c14108"
+   },
+   "ack": null,
+   "next": null,
+   "termination_reason": "链尾:等待本轮审核结论"
+  }
+ ]
+}

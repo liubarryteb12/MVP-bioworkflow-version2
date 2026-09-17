@@ -1,0 +1,125 @@
+name: GSE31210 Real Data + Framework Validation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'crossval/scripts/gse31210_adapter.py'
+      - '.github/workflows/gse31210_real.yml'
+      - 'GSE31210_series_matrix.txt.gz'
+
+jobs:
+  validate-and-write:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install deps
+        run: |
+          pip install --upgrade pip -q
+          pip install -r crossval/requirements.txt
+          pip install pymupdf python-docx -q
+          # 验证
+          python -c "import pandas, numpy, scipy, sklearn, matplotlib, pypdf, fitz; print('deps OK')"
+
+      - name: T1-T9 Framework Validation (Synthetic Baseline)
+        run: |
+          cd crossval
+          echo "=== T1: verify_all.py (synthetic baseline) ==="
+          python scripts/verify_all.py 2>&1 | tee ../out/01_verify_stdout.txt
+          echo "EXIT=${PIPESTATUS[0]}"
+          cp results/report.json ../out/copy/report.json
+          cp results/report.md ../out/copy/report.md 2>/dev/null || true
+
+          echo "=== T2: guard_selftest.py ==="
+          python scripts/guard_selftest.py 2>&1 | tee ../out/04_mutation_stdout.txt
+          cp results/mutation_results.json ../out/copy/mutation_results.json 2>/dev/null || true
+
+          echo "=== T3: writing_guard.py (selftest) ==="
+          python scripts/writing_guard.py --selftest 2>&1 | tee ../out/10_writing_stdout.txt
+          cp results/writing_report.json ../out/copy/writing_report.json 2>/dev/null || true
+
+          echo "=== T4: export_guard.py (selftest) ==="
+          python scripts/export_guard.py --selftest 2>&1 | tee ../out/11_export_stdout.txt
+          echo "export rc=$?"
+
+          echo "=== T5: layout_check.py ==="
+          python scripts/layout_check.py --figdir figures/demo 2>&1 | tee ../out/02_layout_stdout.txt
+          cp results/layout_report.json ../out/copy/layout_report.json 2>/dev/null || true
+
+          echo "=== T6: ablation.py ==="
+          python scripts/ablation.py 2>&1 | tee ../out/03_ablation_stdout.json
+
+          echo "=== T7: consistency_guard.py ==="
+          python scripts/consistency_guard.py \
+            --doc ../框架_独立审核包_v1.md 2>&1 | tee ../out/05_consistency_stdout.txt
+
+          echo "=== T8: report_guard.py ==="
+          python scripts/report_guard.py \
+            --doc ../四角度审核报告_合集.md 2>&1 | tee ../out/06_report_guard_stdout.txt
+
+          echo "=== T9: platform snapshot ==="
+          python scripts/platform_check.py 2>&1 | tail -5
+          cp results/platform_snapshot.json ../out/copy/platform_snapshot.json 2>/dev/null || true
+
+          echo "=== T10: pytest ==="
+          python -m pytest tests/ -q 2>&1 | tee ../out/08_pytest_stdout.txt
+          cp results/pytest_results.json ../out/copy/pytest_results.json 2>/dev/null || true
+
+          echo "=== Summary ==="
+          python -c "
+          import json
+          r = json.load(open('results/report.json'))
+          s = r['summary']
+          print(f'判定项 {s[\"n_pass\"]}/{s[\"n_pass\"]+s[\"n_fail\"]+s.get(\"n_na\",0)} PASS={s[\"n_pass\"]} FAIL={s[\"n_fail\"]} NA={s.get(\"n_na\",0)}')
+          "
+        working-directory: crossval
+        env:
+          PARENT_RUN_ID: ${{ github.run_id }}
+
+      - name: GSE31210 Real Data Analysis
+        run: |
+          cd crossval
+          echo "=== Loading GSE31210 ==="
+          python scripts/gse31210_adapter.py --datadir .. 2>&1 | head -20
+          echo "=== Running real-data analysis ==="
+          python scripts/run_gse31210.py 2>&1 | tee ../out/gse31210_analysis_stdout.txt
+          echo "EXIT=${PIPESTATUS[0]}"
+        working-directory: crossval
+
+      - name: Generate Manuscript + Guards
+        run: |
+          cd crossval
+          echo "=== Writing paper ==="
+          python scripts/make_paper_gse31210.py 2>&1 | tee ../out/paper_stdout.txt
+          echo "=== Writing guard on real manuscript ==="
+          P1="基于公共数据集GSE31210的转录组风险评分对肺腺癌复发具有独立的预后分层价值"
+          python scripts/writing_guard.py \
+            --doc demo/manuscript_fixed.md \
+            --p1 "$P1" \
+            2>&1 | tee ../out/10_writing_stdout_real.txt
+          echo "=== Export guard on real manuscript ==="
+          python scripts/export_guard.py \
+            --a results/export/docA.txt \
+            --b results/export/docB.txt \
+            --p results/export/docP.txt \
+            2>&1 | tee ../out/11_export_stdout_real.txt
+          echo "rc=$?"
+        working-directory: crossval
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: gse31210-deliverables
+          path: |
+            out/
+            crossval/results/
+            crossval/figures/
+            crossval/demo/manuscript*.md
+          retention-days: 7

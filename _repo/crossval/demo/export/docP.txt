@@ -1,0 +1,21 @@
+结果
+
+差异分析共识别 1,284 个差异基因。如图1所示。
+
+图1 差异表达火山图。n = 5 biologically independent samples per group. 数据以 mean ± SEM 表示。双侧 Wilcoxon 检验, BH 校正。
+
+生存分析显示高风险组中位生存期显著更短。如图2所示。
+
+图2 生存曲线。n = 226. Log-rank 检验, 双侧。删失以刻度标记。
+
+模型在校准曲线上表现良好。如图3所示。
+
+图3 校准曲线。n = 226. Brier score 及 95% CI(1000 次 bootstrap)。
+
+敏感性分析结果见表1。
+
+表1 敏感性分析。
+
+参考文献
+[1] Smith J, et al. Nature. 2020;580:123-130.
+[2] Lee K, et al. Cell. 2021;184:455-470.

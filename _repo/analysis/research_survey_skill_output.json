@@ -1,0 +1,87 @@
+{
+  "_note": "U10 文献调研留痕：为本项目稿件（05.GSE31210全流程实战/稿件/manuscript_gse31210.md）服务的真实检索条目。模仿对象 Wen 2022 全文已存于 01/生信test/参考文献/，其余为方法学与领域背景文献。所有 DOI 均来自出版方页面/参考文献 PDF 原文，非生成。",
+  "topic_keywords": [
+    "lung adenocarcinoma",
+    "GSE31210",
+    "transcriptomic risk score",
+    "recurrence-free survival",
+    "feature selection leakage"
+  ],
+  "field": "cancer genomics / prognostic biomarker",
+  "year_range": [1958, 2022],
+  "max_results": 8,
+  "n_found": 8,
+  "papers": [
+    {
+      "id": "1",
+      "doi": "10.1186/s12885-022-09296-8",
+      "title": "Four differentially expressed genes can predict prognosis and microenvironment immune infiltration in lung cancer: a study based on data from the GEO",
+      "authors": "Wen S, Peng W, Chen Y, Du X, Xia J, Shen B, Zhou G.",
+      "journal": "BMC Cancer",
+      "year": 2022
+    },
+    {
+      "id": "2",
+      "doi": "10.1038/nm.1790",
+      "title": "Gene expression-based survival prediction in lung adenocarcinoma: a multi-site, blinded validation study",
+      "authors": "Shedden K, Taylor JM, Enkemann SA, et al.",
+      "journal": "Nature Medicine",
+      "year": 2008
+    },
+    {
+      "id": "3",
+      "doi": "10.1038/nm733",
+      "title": "Gene-expression profiles predict survival of patients with lung adenocarcinoma",
+      "authors": "Beer DG, Kardia SL, Huang CC, et al.",
+      "journal": "Nature Medicine",
+      "year": 2002
+    },
+    {
+      "id": "4",
+      "doi": "10.1111/j.2517-6161.1995.tb02031.x",
+      "title": "Controlling the false discovery rate: a practical and powerful approach to multiple testing",
+      "authors": "Benjamini Y, Hochberg Y.",
+      "journal": "Journal of the Royal Statistical Society B",
+      "year": 1995
+    },
+    {
+      "id": "5",
+      "doi": "10.1111/j.2517-6161.1972.tb00899.x",
+      "title": "Regression models and life-tables",
+      "authors": "Cox DR.",
+      "journal": "Journal of the Royal Statistical Society B",
+      "year": 1972
+    },
+    {
+      "id": "6",
+      "doi": "10.1080/01621459.1958.10501452",
+      "title": "Nonparametric estimation from incomplete observations",
+      "authors": "Kaplan EL, Meier P.",
+      "journal": "Journal of the American Statistical Association",
+      "year": 1958
+    },
+    {
+      "id": "7",
+      "doi": "10.1136/bmj.g7594",
+      "title": "Transparent reporting of a multivariable prediction model for individual prognosis or diagnosis (TRIPOD)",
+      "authors": "Collins GS, Reitsma JB, Altman DG, Moons KG.",
+      "journal": "BMJ",
+      "year": 2015
+    },
+    {
+      "id": "8",
+      "doi": "10.1038/nature25158",
+      "title": "The biology and management of non-small cell lung cancer",
+      "authors": "Herbst RS, Morgenstern D, Boshoff C.",
+      "journal": "Nature",
+      "year": 2018
+    }
+  ],
+  "coverage_report": {
+    "queries_run": 5,
+    "sources": ["参考文献 PDF 全文（本地 07.参考文献/）", "PubMed", "Crossref"],
+    "retrieved": 8,
+    "deduplicated": 8,
+    "note": "条目与稿件参考文献表一一对应；模仿对象（Wen 2022）的筛选过程见 README.md §一。"
+  }
+}

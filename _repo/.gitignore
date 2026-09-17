@@ -1,0 +1,39 @@
+# .gitignore —— 结构契约（对标 KDS：不得携带字节码、产物不得入库）
+# 立此文件的直接原因：仓库此前无 .gitignore，"无字节码入库"只能靠人自觉。
+
+# ① 字节码与测试缓存
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ② 运行产物（由云端 Artifacts 落位到 05/08，不进仓库）
+analysis/export/
+analysis/figures/
+analysis/results/
+analysis/runs/
+figures/          # 兼容旧布局（仓库根直接出图时）
+results/
+
+# ③ 构建/打包产物
+# 注：仓库分发的数据文件是 .gz（GSE31210_series_matrix.txt.gz、analysis/assets/GPL570.annot.gz），
+#     不被以下规则匹配，勿加 *.gz。
+build/
+dist/
+*.egg-info/
+*.zip
+
+# ④ 编辑器与系统
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# ⑤ 环境与凭据（防误提交）
+.env
+.env.*
+*.pem
+*.key

@@ -1,0 +1,11 @@
+{
+  "run_name": "modules_ext_demo",
+  "gse": "GSE31210",
+  "data_path": "GSE31210_series_matrix.txt.gz",
+  "seed": 20260910,
+  "group_prefix": "tissue:",
+  "modules": ["M01", "M02", "M03", "M04", "M11", "M12", "M13", "M15", "M16"],
+  "params": {
+    "M04": {"group_a": "primary lung tumor", "group_b": "normal lung", "fc": 0.585}
+  }
+}

@@ -1,14 +1,7 @@
-# 误复制到仓库根目录的杂散产物（清理需用户确认，先用 gitignore 隔离）
-/outputs/
-/metadata/
-/_runs/
-/snapshots/
-/data_availability_*.yaml
-/figure_export_*.yaml
-/p1_to_p2_evidence_*.yaml
-/p1_to_p4_quality_*.yaml
-/migration_log_*.yaml
-/run_20*/
 
-# 运行态大文件不入库（结果以 artifact 落位编号文件夹为准）
+# safety: never push raw data
+*.gz
 inputs/raw/
+__pycache__/
+*.pyc
+

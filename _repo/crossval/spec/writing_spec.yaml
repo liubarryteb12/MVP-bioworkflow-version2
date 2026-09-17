@@ -1,0 +1,214 @@
+# 写作流程层配置 v1.0 —— WP-1~9 + NC-1~NC-7 的词表/阈值/接口
+#
+# ⚠ v2.15 事故记录:初版用 `; ` 分隔写列表(如 `- 首次; - 揭示`),
+#   YAML 会解析为**单个字符串** "首次; - 揭示; ..." 而非列表。
+#   后果: `w in t` 恒为 False → 判据永远 PASS → **空规**(第 11 条陷阱形态①)。
+#   本文件现全部使用标准 YAML 块序列, 并由 writing_guard 的类型自检守护。
+
+version: "1.0"
+
+core:
+  required: [P0, P1, P2, P3, P4]
+  p1_min_chars: 20
+  p1_max_chars: 300
+
+title:
+  upgrade_words:
+    - 首次
+    - 揭示
+    - 阐明
+    - 驱动
+    - 机制
+    - 证明
+    - 证实
+    - 开创性
+    - 突破性
+    - 决定性
+    - 根本上
+  blacklist:
+    - 研究
+    - 分析
+    - 探索
+    - 初探
+    - 浅析
+    - 探讨
+    - 若干问题
+    - 一些
+  max_chars_zh: 25
+  max_words_en: 20
+  require_object: true
+  require_finding: true
+
+abstract:
+  sections:
+    - 背景
+    - 方法
+    - 结果
+    - 结论
+  sections_en: [Background, Methods, Results, Conclusions]
+  first_sentence_must_be_P1: true
+  require_boundary_tail:
+    - 尚需
+    - 待验证
+    - 未来
+    - 局限
+    - 有待
+    - 需要进一步
+  n_pattern: 'n\s*=\s*\d+|共\s*\d+\s*例|N\s*=\s*\d+'
+  max_chars_zh: 350
+
+background:
+  require_skill_trace: true
+  skill_marker: research_survey_skill
+  require_gap_statement:
+    - 然而
+    - 尚未
+    - 目前缺乏
+    - 仍不清楚
+    - 未有
+    - 存在空白
+  recent_years: 5
+  recent_ratio_min: 0.50
+
+methods:
+  version_pattern: 'v?\d+\.\d+|批号|版本|version'
+  prereg_keywords:
+    - 预注册
+    - 偏离
+    - 变更
+    - 事先设定
+  stats_required:
+    sided:
+      - 双侧
+      - 单侧
+      - two-sided
+      - one-sided
+    correction:
+      - BH
+      - Bonferroni
+      - FDR
+      - FWER
+      - 多重校正
+  ethics_pattern: '伦理|IRB|IACUC|批准号|审批'
+  sharing_pattern: 'GSE\d+|SRR\d+|PRJNA\d+|DOI|公开获取|available'
+  power_pattern: 'power|样本量估计|功效|EPV|events per variable'
+
+results_text:
+  ledger_pattern: '\[L-[A-Za-z0-9]+\]'
+  ledger_window: 50
+  significant_words:
+    - 显著
+    - 明显
+    - 统计学差异
+  mechanism_blacklist:
+    - 驱动
+    - 阐明
+    - 机制
+    - 调控
+    - 介导
+  require_negative:
+    - 不显著
+    - 无差异
+    - 未见
+    - 没有观察到
+
+results_layout:
+  fig_pattern: '图\s*\d+|Fig\.?\s*\d+'
+  table_pattern: '表\s*\d+|Table\s*\d+'
+  max_para_distance: 3
+  panel_labels: [a, b, c, d, e, f]
+
+legend:
+  required_8:
+    - title_sentence
+    - description
+    - exact_n
+    - error_bar_center
+    - test_sided_correction
+    - pvalue_display
+    - abbreviation
+    - permission
+  max_chars: 250
+  n_pattern: 'n\s*=\s*\d+'
+  error_bar_pattern: 'SD|SEM|95%\s*CI|CI|置信区间|误差带|标准差|标准误|不设误差棒|无误差棒|单点估计'
+  center_pattern: 'mean|median|均值|中位数'
+  test_pattern: '检验|test'
+
+figtitle:
+  blacklist:
+    - 主要结果
+    - 相关分析
+    - 结果展示
+    - 数据分析
+  max_chars_zh: 15
+  max_words_en: 12
+
+discussion:
+  first_para_must_be_P1: true
+  boundary_words:
+    - 局限
+    - 不足
+    - 未涉及
+    - 尚需
+    - 谨慎
+    - 待
+  outlook_words:
+    - 未来
+    - 进一步
+    - 后续
+    - 下一步
+    - 展望
+  mechanism_words:
+    - 驱动
+    - 阐明
+    - 机制
+    - 调控
+  mechanism_needs_level: true
+  mechanism_window: 50
+  level_pattern: '\(L\d\)|L\d'
+  l1_qualifier:
+    - 待独立验证
+    - 初步
+    - 尚需
+    - 未独立
+    - 单一
+
+refs:
+  cite_pattern: '\[\d+(?:[-,]\d+)*\]'
+  require_doi_or_pmid: true
+  max_self_cite_ratio: 0.20
+  formats: [Vancouver, APA, Nature, 编号制]
+
+ai_style:
+  template_phrases:
+    - 随着.*的发展
+    - 近年来
+    - 在当前.*背景下
+    - 众所周知
+  hollow_phrases:
+    - 具有重要意义
+    - 发挥着关键作用
+    - 至关重要
+    - 不可或缺
+  transition_words:
+    - 然而
+    - 因此
+    - 此外
+    - 同时
+    - 另外
+  transition_max_per_kchar: 3
+  para_len_std_min: 30
+  first_word_repeat_max: 0.30
+  sent_len_std_min: 8
+  parallel_max_per_kchar: 2
+  no_subject_max_per_kchar: 2
+  meta_discourse_max_per_kchar: 1
+  meta_words:
+    - 值得注意的是
+    - 需要指出的是
+    - 不难发现
+
+export:
+  outputs: [docx_A, docx_B, pdf]
+  placeholder_pattern: '\[(图|表)\s*\d+位置\]'
+  min_dpi: 300

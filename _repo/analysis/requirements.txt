@@ -1,0 +1,14 @@
+numpy==2.5.0
+scipy
+scikit-learn
+matplotlib
+pandas
+statsmodels
+pyyaml
+gseapy
+Pillow
+python-docx
+pypdf
+reportlab
+pytest
+pymupdf

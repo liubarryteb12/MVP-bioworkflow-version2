@@ -1,7 +1,0 @@
-dataset: GSE7451
-stage: basic
-requested_at: 2026-09-15T17:42:00+08:00
-requested_by: agent
-rerun: 7
-rerun_reason: 手工RMA 汇总改为列中位数近似(去 medpolish 循环)，加装 matrixStats；runner 为单核且 preprocessCore pthread 不可用
-paper: Hu S, et al. Arthritis Rheum. 2007.

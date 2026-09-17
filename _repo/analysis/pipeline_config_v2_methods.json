@@ -1,0 +1,15 @@
+{
+  "run_name": "v2_methods_demo",
+  "gse": "GSE31210",
+  "data_path": "GSE31210_series_matrix.txt.gz",
+  "seed": 20260910,
+  "group_prefix": "tissue:",
+  "exclude_prefix": "exclude",
+  "modules": ["M01", "M02", "M03", "M04", "M07", "M18", "M20", "M19"],
+  "params": {
+    "M04": {"group_a": "primary lung tumor", "group_b": "normal lung", "fc": 0.585},
+    "M18": {"topn": 20, "min_abs_r": 0.5, "min_n": 10},
+    "M20": {"topk": 200, "C": 0.1, "n_splits": 5, "seed": 20260910},
+    "M19": {"horizon_days": 1825}
+  }
+}

@@ -1,0 +1,132 @@
+# 作图规范 v1.0 —— 机器可检部分(依据:用户提供的 A–D 条文)
+# 仅收录**可机械判定**的条目;Nature 官方措辞类条目见 作图规范_v1.0.md 并标注"需人工核对原文"。
+version: "1.0"
+
+# ---------- A-7 色板 ----------
+palettes:
+  wong2011:            # Nature Methods 8:441 (2011) Bang Wong
+    - "#000000"
+    - "#E69F00"
+    - "#56B4E9"
+    - "#009E73"
+    - "#F0E442"
+    - "#0072B2"
+    - "#D55E00"
+    - "#CC79A7"
+  okabe_ito:
+    - "#000000"
+    - "#E69F00"
+    - "#56B4E9"
+    - "#009E73"
+    - "#F0E442"
+    - "#0072B2"
+    - "#D55E00"
+    - "#CC79A7"
+
+sequential_safe:        # 连续数据
+  - viridis
+  - cividis
+  - plasma
+  - magma
+  - inferno
+
+forbidden:              # A-7 禁止
+  rainbow: [jet, rainbow, hsv, nipy_spectral, gist_rainbow]
+  red_green_pair: true  # 红绿对比
+  cmap_names: [jet, rainbow, hsv, nipy_spectral, gist_rainbow, spectral]
+
+colorblind:
+  simulate: [protanopia, deuteranopia, tritanopia]
+  min_delta_e: 10.0     # CIELAB 距离下限(protan/deutan 强制)
+  tritanopia_advisory: 8.0   # 建议级:Wong 色板不保证三色盲安全(实测 8.65)
+  # ⚠ 实测:ΔE 抓不到"纯红/纯绿"(亮度差 0.50,模拟后仍可分)。
+  #   真正的风险是等亮度红绿 → 由 C-6.c3 单独检查。
+  redgreen:
+    hue_gap_deg: [80, 160]
+    max_lum_diff: 0.15
+
+# ---------- A-1 分辨率 ----------
+dpi:
+  photo_min: 300        # 照片/连续色调
+  line_min: 600         # 线条图
+  mixed_min: 600
+  raster_target: 600
+  preview_target: 300
+
+# ---------- A-3 / §5.8 格式（2026-09-15 对齐 09/03 照做版）----------
+# 软件画的图（matplotlib 等）→ 矢量 PDF 主文件（Type42 嵌字体，绕开 DPI）；
+# JPG 对线条图有损失真 → 禁用；TIFF+LZW 仅适用于设备拍摄的照片类位图
+# （图表类存 TIFF 即使 LZW 也压不动抗锯齿：实测单栏 10.3MB/双栏 43MB）。
+formats:
+  required: [pdf, svg, png]
+  vector_main: [pdf, eps, svg]   # 矢量主图/母版（SVG 字转路径，09/03 出图工具口径）
+  raster_main: [tiff]            # 光栅主图（仅照片/显微/电镜类）
+  forbidden_as_main: [jpg, jpeg] # Nature 明文:JPEG 不得作主图生产文件
+  png_role: preview              # 仅预览/稿件内嵌（线条图位图 1200dpi，矢量直渲）
+  max_bytes:
+    main: 10485760               # 10 MB（09/03 照做版：Wiley 硬规定）
+    extended_data: 10485760      # 10 MB
+
+# ---------- A-2 色彩模式 ----------
+color_mode:
+  original_research: RGB
+  review: CMYK
+
+# ---------- A-5 尺寸（2026-09-15 对齐 09/03 照做版：单栏 8.5cm / 双栏 17.4cm 四家通吃）----------
+size:
+  single_col_max_mm: 85     # 8.5cm（Springer 8.5 / Elsevier ~9 / Wiley 8–18，取最小画幅）
+  double_col_max_mm: 174    # 17.4cm（照做版推荐画幅，双栏像素宽 4110px@600dpi）
+  height_max_mm: 170
+  linewidth_pt: [0.5, 1.5]  # 照做版：线宽 0.5–1.5pt（底线 0.25pt）
+  fontsize_pt: [7, 8]       # 照做版：正文 8pt（底线 7pt）、上下标 ≥6pt
+  panel_label_pt: 10        # 照做版：子图标签 10–12pt 加粗
+
+# ---------- A-6 禁止项 ----------
+forbidden_elements:
+  - background_grid
+  - drop_shadow
+  - pattern_fill
+  - decorative_icon
+
+# ---------- §5.7 命名 ----------
+naming:
+  pattern: '^\d{2}_[a-z][a-z0-9]*_[a-z0-9_]+\.(pdf|eps|tiff|tif|png|jpg|jpeg)$'
+  example: "02_deg_volcano.pdf"
+  # analysis_step 必须属于框架阶段标签(见 G-7)
+  step_must_match_framework: true
+
+# ---------- B / D 图注必含项 ----------
+legend:
+  error_bar_required: ["SD", "SEM", "95% CI", "CI"]      # B-1
+  center_required: ["mean", "median"]                     # B-1
+  n_pattern: '\bn\s*=\s*\d+\b'                            # B-2 精确整数
+  n_forbid_range: '\bn\s*=\s*\d+\s*[-–—]\s*\d+'           # 禁止 n=3-6
+  replicate_unit_required:                                 # B-2 单位
+    - "biologically independent"
+    - "independent experiment"
+    - "independent sample"
+    - "animals"
+    - "donor"
+    - "patients"
+    - "cells"
+    - "独立"
+  test_required:                                           # B-3
+    - "test"
+    - "检验"
+  sided_required: ["two-sided", "two-tailed", "one-sided", "one-tailed", "双侧", "单侧"]
+  correction_keywords:
+    - "correction"
+    - "corrected"
+    - "BH"
+    - "FDR"
+    - "Bonferroni"
+    - "校正"
+  boxplot_required:                                        # B-5
+    - ["minima|minimum|min", "最小值"]
+    - ["maxima|maximum|max", "最大值"]
+    - ["centre|center|median", "中线"]
+    - ["bounds|box|Q1|quartile", "箱体边界"]
+    - ["whisker", "须"]
+    - ["percentile", "百分位"]
+  max_words_nature: 250                                    # D-3
+  forbid_method_narration: true                            # D-4
