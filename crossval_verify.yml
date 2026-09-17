@@ -1,0 +1,204 @@
+# 云端照镜子 · 框架交叉验证 T1–T11（GitHub Actions 版）
+# 依据：云端服务器执行提示词_v1.0（v2.26 口径），逐条对应 T1–T11，未增删命令。
+# 纪律：不修改任何框架代码；FAIL 是结果不是故障，不重试、不为了让数字变绿做任何事。
+# 仓库结构要求：
+#   .github/workflows/crossval_verify.yml   ← 本文件
+#   pkg/框架交叉验证包_v2.26_20260912.zip    ← 从 交付_v2.26/ 复制上传（1.4MB）
+# 产物：Actions 运行页 → Artifacts → crossval-outputs（全部原始 stdout + JSON 台账）
+
+name: crossval-verify-T1-T11
+
+on:
+  workflow_dispatch:
+
+jobs:
+  framework-verify:
+    name: 框架自证（T1–T11）
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: T1–T11 官方流程
+        env:
+          PYTHONUTF8: "1"
+          PYTHONIOENCODING: utf-8
+        run: |
+          set +e
+          export CVROOT=$HOME/cvrun
+          mkdir -p $CVROOT/pkg $CVROOT/out/copy
+          progress() { echo "$1 | $(date '+%F %T')" >> $CVROOT/out/PROGRESS.md; }
+
+          echo "===== T1 环境准备 ====="
+          python3 --version
+          which unzip || { sudo apt-get update -qq && sudo apt-get install -y -qq unzip; }
+          progress "T1 环境准备 ✅ python=$(python3 --version)"
+
+          echo "===== T2 解压与核对 ====="
+          cd $CVROOT/pkg
+          unzip -q "$GITHUB_WORKSPACE/pkg/框架交叉验证包_v2.26_20260912.zip" -d $CVROOT/pkg
+          echo "--- 文件总数 ---"; find . -type f | wc -l
+          MISS=0
+          for f in MANIFEST.json ZIP_CONTENTS.md crossval/scripts/verify_all.py \
+                   框架_独立审核包_v*.md 四角度审核报告_合集_v*.md; do
+            hit=$(ls $f 2>/dev/null | head -1)
+            [ -n "$hit" ] && echo "OK   $f" || { echo "MISS $f"; MISS=1; }
+          done
+          [ $MISS -eq 0 ] && progress "T2 解压核对 ✅" || progress "T2 解压核对 ❌ CP-2 缺文件（G2 网关 STOP）"
+          if [ $MISS -eq 1 ]; then echo "G2 STOP：CP-2 五项必需文件缺失"; exit 2; fi
+
+          echo "===== T3 依赖安装（requirements.txt 为唯一来源）====="
+          cd $CVROOT/pkg/crossval
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install --upgrade pip -q
+          pip install -r requirements.txt
+          PIRC=$?
+          if [ $PIRC -ne 0 ]; then
+            echo "pip 首次失败，按 §7 换镜像重试 1 次"
+            pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+            PIRC=$?
+          fi
+          echo "PIP_EXIT=$PIRC"
+          [ $PIRC -eq 0 ] && progress "T3 依赖安装 ✅" || progress "T3 依赖安装 ❌（G3 网关注意）"
+
+          echo "===== T4 主验证 ====="
+          python3 scripts/verify_all.py 2>&1 | tee $CVROOT/out/01_verify_stdout.txt
+          echo "EXIT=${PIPESTATUS[0]}"
+          cp results/report.json $CVROOT/out/copy/ 2>/dev/null
+          cp results/report.md   $CVROOT/out/copy/ 2>/dev/null
+          progress "T4 主验证（数字见 01_verify_stdout.txt 末行）"
+
+          echo "===== T5 排版检查 ====="
+          python3 scripts/layout_check.py --figdir figures/demo 2>&1 | tee $CVROOT/out/02_layout_stdout.txt
+          echo "EXIT=${PIPESTATUS[0]}"
+          cp results/layout_report.json $CVROOT/out/copy/ 2>/dev/null
+          progress "T5 排版检查"
+
+          echo "===== T6 判据消融（不可跳过，只出 stdout 必须 tee）====="
+          python3 scripts/ablation.py 2>&1 | tee $CVROOT/out/03_ablation_stdout.json
+          echo "EXIT=${PIPESTATUS[0]}"
+          progress "T6 判据消融"
+
+          echo "===== T7 变异测试（守卫有效性；退出码三态 0/1/2）====="
+          python3 scripts/guard_selftest.py 2>&1 | tee $CVROOT/out/04_mutation_stdout.txt
+          echo "EXIT=${PIPESTATUS[0]}   # 0=全绿 1=空规(高价值发现) 2=环境错误(本轮无效)"
+          cp results/mutation_results.json $CVROOT/out/copy/ 2>/dev/null
+          progress "T7 变异测试"
+
+          echo "===== T8 三道守卫 + 环境快照 ====="
+          DOC_FRAME=$(ls $CVROOT/pkg/框架_独立审核包_v*.md | head -1)
+          DOC_REPORT=$(ls $CVROOT/pkg/四角度审核报告_合集_v*.md | head -1)
+          python3 scripts/consistency_guard.py --doc "$DOC_FRAME" 2>&1 | tee $CVROOT/out/05_consistency_stdout.txt
+          echo "EXIT=${PIPESTATUS[0]}"
+          python3 scripts/report_guard.py      --doc "$DOC_REPORT" 2>&1 | tee $CVROOT/out/06_report_guard_stdout.txt
+          echo "EXIT=${PIPESTATUS[0]}"
+          python3 scripts/platform_check.py    2>&1 | tail -5 | tee $CVROOT/out/07_platform_snapshot_tail.txt
+          cp results/platform_snapshot.json $CVROOT/out/copy/ 2>/dev/null
+          python3 ../handoff/scripts/handoff_guard.py 2>&1 | tee $CVROOT/out/09_handoff_stdout.txt
+          echo "EXIT=${PIPESTATUS[0]}"
+          cp results/guard_results.json $CVROOT/out/copy/ 2>/dev/null
+          progress "T8 三道守卫+环境快照"
+
+          echo "===== T9 单元测试 ====="
+          python3 -m pytest tests/ -q 2>&1 | tee $CVROOT/out/08_pytest_stdout.txt
+          echo "EXIT=${PIPESTATUS[0]}"
+          cp results/pytest_results.json $CVROOT/out/copy/ 2>/dev/null
+          progress "T9 单元测试"
+
+          echo "===== T10 写作流程守卫（--p1 与 --skill 必须提供）====="
+          P1=$(awk '/^## 摘要/{f=1;next} f && NF {print; exit}' demo/manuscript_fixed.md | sed 's/。.*/。/')
+          echo "提取的真实 P1：$P1"
+          python3 scripts/writing_guard.py --doc demo/manuscript_fixed.md \
+            --p1 "$P1" --skill demo/research_survey_skill_demo.json \
+            2>&1 | tee $CVROOT/out/10_writing_stdout.txt
+          echo "EXIT=${PIPESTATUS[0]}"
+          cp results/writing_report.json $CVROOT/out/copy/ 2>/dev/null
+          # 先红后绿自证：去掉 --skill 重跑，应出现 [FAIL] WP-3.1
+          python3 scripts/writing_guard.py --doc demo/manuscript_fixed.md --p1 "$P1" \
+            2>&1 | tee $CVROOT/out/10b_writing_no_skill_stdout.txt
+          echo "EXIT=${PIPESTATUS[0]}   # 预期非 0 且含 [FAIL] WP-3.1，证明该判据非空规"
+          progress "T10 写作守卫"
+
+          echo "===== T11 三格式导出守卫 ====="
+          python3 scripts/export_guard.py \
+            --a demo/export/docA.txt --b demo/export/docB.txt --p demo/export/docP.txt \
+            2>&1 | tee $CVROOT/out/11_export_stdout.txt
+          echo "EXIT=${PIPESTATUS[0]}"
+          progress "T11 导出守卫"
+
+          echo "===== 收尾：ENDCHECKMARK 数据 ====="
+          {
+            echo "=== ENDCHECKMARK ==="
+            echo "platform   : $(uname -sr)"
+            echo "python     : $(python3 --version)"
+            echo "判定项/分支 : 见 out/copy/report.json summary"
+            echo "=== END ==="
+          } | tee $CVROOT/out/00_endcheckmark.txt
+          cp -r $CVROOT/out "$GITHUB_WORKSPACE/cloud_out"
+          echo "===== 全部完成，产物在 cloud_out/ ====="
+
+      - name: 上传全部原始输出（Artifacts）
+        uses: actions/upload-artifact@v4
+        with:
+          name: crossval-outputs
+          path: cloud_out/
+          retention-days: 30
+
+  realdata-preflight:
+    name: GSE31210 数据预检（U01 九槽位前置，非分析）
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: 下载 GSE31210 并做完整性 + 元数据预检
+        run: |
+          mkdir -p cloud_out
+          cd cloud_out
+          URL="https://ftp.ncbi.nlm.nih.gov/geo/series/GSE31nnn/GSE31210/suppl/GSE31210_series_matrix.txt.gz"
+          echo "下载：$URL"
+          curl -sSL --retry 2 -o GSE31210_series_matrix.txt.gz "$URL"
+          ls -la GSE31210_series_matrix.txt.gz
+          gzip -t GSE31210_series_matrix.txt.gz && echo "gzip 完整性 OK"
+          sha256sum GSE31210_series_matrix.txt.gz | tee GSE31210_sha256.txt
+          python3 - <<'EOF' | tee GSE31210_预检.md
+          import gzip, re
+          path = "GSE31210_series_matrix.txt.gz"
+          meta = {}
+          samples = None
+          chars = []
+          with gzip.open(path, "rt", errors="replace") as f:
+              for line in f:
+                  line = line.rstrip("\n")
+                  if line.startswith("!Series_title"):
+                      meta["title"] = line.split("\t", 1)[1].strip('"')
+                  elif line.startswith("!Series_platform_id"):
+                      meta["platform"] = line.split("\t", 1)[1].strip('"')
+                  elif line.startswith("!Series_summary"):
+                      meta.setdefault("summary", []).append(line.split("\t", 1)[1].strip('"'))
+                  elif line.startswith("!Sample_geo_accession"):
+                      samples = line.split("\t")[1:]
+                  elif line.startswith("!Sample_characteristics_ch1"):
+                      chars.append(line.split("\t")[1:])
+                  elif line.startswith("!series_matrix_table_end"):
+                      break
+          print("# GSE31210 预检（U01 九槽位前置材料，非分析结论）\n")
+          print(f"- Series 标题：{meta.get('title')}")
+          print(f"- 平台：{meta.get('platform')}")
+          print(f"- 样本数：{len(samples) if samples else '未知'}")
+          print(f"- 特征字段行数：{len(chars)}")
+          for i, c in enumerate(chars):
+              vals = sorted(set(c))
+              print(f"  - characteristics[{i}]：{len(vals)} 个取值，示例：{vals[:6]}")
+          print("\n> 说明：本预检只登记九槽位所需的来源/平台/样本/字段信息，")
+          print("> 不做任何 QC 判定或分析——那要等 U00 预注册填槽后在流水线里做。")
+          EOF
+          cd ..
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gse31210-preflight
+          path: cloud_out/
+          retention-days: 30
