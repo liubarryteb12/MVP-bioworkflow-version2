@@ -167,6 +167,16 @@ jobs:
           python -m pytest test_module_contracts.py -q -p no:cacheprovider 2>&1 | tee module_contracts_stdout.txt
           echo "CONTRACT_EXIT=${PIPESTATUS[0]}   # 0=注册表/配置/纯函数/适配器/插件契约全绿"
 
+      - name: 下载 GSE31210 表达矩阵（运行时从 GEO 拉取，不入库，保数据安全）
+        run: |
+          set -e
+          OUT="${{ github.workspace }}/GSE31210_series_matrix.txt.gz"
+          URL="https://ftp.ncbi.nlm.nih.gov/geo/series/GSE31nnn/GSE31210/matrix/GSE31210_series_matrix.txt.gz"
+          echo "下载 $URL -> $OUT"
+          curl -fsSL --retry 3 --retry-delay 5 -o "$OUT" "$URL"
+          ls -la "$OUT"
+          gzip -t "$OUT" && echo "gzip 完整性 OK"
+
       - name: 运行全链分析（QC→DEG→富集→折内建模→Cox/KM→台账→图件）
         env:
           GSE_DATA_PATH: ${{ github.workspace }}/GSE31210_series_matrix.txt.gz
@@ -271,6 +281,16 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+
+      - name: 下载 GSE31210 表达矩阵（运行时从 GEO 拉取，不入库，保数据安全）
+        run: |
+          set -e
+          OUT="${{ github.workspace }}/GSE31210_series_matrix.txt.gz"
+          URL="https://ftp.ncbi.nlm.nih.gov/geo/series/GSE31nnn/GSE31210/matrix/GSE31210_series_matrix.txt.gz"
+          echo "下载 $URL -> $OUT"
+          curl -fsSL --retry 3 --retry-delay 5 -o "$OUT" "$URL"
+          ls -la "$OUT"
+          gzip -t "$OUT" && echo "gzip 完整性 OK"
 
       - name: 仓库内 GSE31210 完整性 + 元数据预检
         run: |

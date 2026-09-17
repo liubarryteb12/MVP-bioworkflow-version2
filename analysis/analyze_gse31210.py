@@ -14,6 +14,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score, roc_curve
 warnings.filterwarnings("ignore")
+from probe_mapping import resolve_report   # 探针→基因 symbol 通用框架（列由 AI 按数据集指定）
 
 SEED = 20260910
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -121,22 +122,14 @@ n_prog = int(prog.sum()); n_ev = int((info.loc[prog, "relapse"] == "relapsed").s
 L("U01_排除规则", f"排除标记=exclude 共 {n_tumor - n_prog} 例 → 预后集 n={n_prog}", "预注册唯一排除标准")
 L("U04_EPV", round(n_ev / 1, 1), f"事件 {n_ev}，EPV={n_ev}≥10（单评分变量）")
 
-# 探针→基因注释
-sym = {}
-with gzip.open(ANNOT, "rt", errors="replace") as f:
-    header_done = False
-    for line in f:
-        if line.startswith("!platform_table_begin"):
-            header_done = True; continue
-        if header_done:
-            if line.startswith("!platform_table_end"):
-                break
-            parts = line.rstrip("\n").split("\t")
-            if len(parts) >= 3:
-                sym[parts[0].strip('"')] = parts[2].strip('"')
-probe2sym = {p: sym.get(p, None) for p in expr.index}
+# 探针→基因注释（平台无关框架；列由 AI 按数据集显式指定，不写死 parts[2]）
+#   GPL570.annot.gz：探针列=0 'ID'，symbol 列=2 'Gene symbol'
+_annot_rep, probe2sym = resolve_report(ANNOT, probe_col=0, symbol_col=2, split_multi=False)
 n_annot = sum(1 for v in probe2sym.values() if v)
-L("U01_注释覆盖", f"{n_annot}/{expr.shape[0]} 探针有基因符号", "GPL570 官方注释")
+L("U01_注释覆盖",
+  f"{n_annot}/{expr.shape[0]} 探针有基因符号",
+  f"GPL570 官方注释 | 探针列={_annot_rep['probe_name']} 符号列={_annot_rep['symbol_name']} "
+  f"覆盖{_annot_rep['coverage_pct']}% 多symbol={_annot_rep['n_probes_multi_symbol']}")
 
 # ---------- U03a 差异表达 ----------
 print("=" * 70, "\nU03a 差异表达（Welch t + BH）", sep="")
